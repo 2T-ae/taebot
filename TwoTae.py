@@ -48,6 +48,6 @@ async def on_member_remove(member):
         # 서버에서 멤버가 나갔을 때 실행 될 이벤트
     await bot.get_channel(idchannel).send(f"{member.mention}님이 서버에서 나가셨어요.")
 
-access.token = os.environ["BOT_TOKEN"]
+access_token = os.environ["BOT_TOKEN"]
 
 bot.run(access_token)
