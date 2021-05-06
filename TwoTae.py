@@ -9,6 +9,15 @@ bot = commands.Bot(command_prefix='&', intents = intents)
 bot.remove_command('help')
 idchannel = 837332811831967804
 
+@bot.event
+async def on_ready():
+    # 프로그램 실행 시 초기 구성
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="Do My Best by D.Ark"))  
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    print('------')
+
 @bot.command()
 async def 안녕(ctx):
     await ctx.send('안녕!')
