@@ -39,6 +39,13 @@ async def help(ctx, arg):
         embed.add_field(name='&도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
         embed.add_field(name='&DM', value='`이테를 디엠으로 부를 수 있습니다.`', inline=True)
         await ctx.send(embed = embed)
+    if arg == 'music':
+        # help music를 사용했을때 출력 될 임베드
+        embed = discord.Embed(title='Music', description='Tae Bot Music Commands', color=0xFAFD40)
+        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.add_field(name='&j', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
+        embed.add_field(name='&p <노래 이름 혹은 url>', value='`봇을 통해 노래를 재생할 수 있습니다.`', inline=True)
+        await ctx.send(embed = embed)
 
 @bot.command()
 async def DM(ctx):
