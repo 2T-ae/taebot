@@ -27,14 +27,15 @@ async def 도움말(ctx):
     embed = discord.Embed(title='도움말', description=' ', color=0xFAFD40)
     embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
     embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
-    embed.add_field(name='Commands', value='`&help command`', inline=False)
+    embed.add_field(name='Command', value='`&help command`', inline=True)
+    embed.add_field(name='Music', value='`&help music`', inline=True)
     await ctx.send(embed = embed)
 
 @bot.command()
 async def help(ctx, arg):
     if arg == 'command':
         # help commands를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Commands', description='Tae Bot Commands', color=0xFAFD40)
+        embed = discord.Embed(title='Command', description='Tae Bot Commands', color=0xFAFD40)
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
         embed.add_field(name='&도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
         embed.add_field(name='&DM', value='`이테를 디엠으로 부를 수 있습니다.`', inline=True)
