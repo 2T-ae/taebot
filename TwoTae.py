@@ -7,12 +7,13 @@ from discord.ext import commands, tasks
 import asyncio
 import random
 import os
+import dbdmusic
 
 from discord.mentions import AllowedMentions
 
 intents = discord.Intents.all()
 intents.members = True 
-bot = commands.Bot(command_prefix='&', intents = intents)
+bot = commands.Bot(command_prefix='&', intents = intents, lavalinkpass = "yourpass", lavalinkport = 6969)
 bot.remove_command('help')
 idchannel = 844796497157423114
 #서예은 방 채널아이디
