@@ -15,6 +15,7 @@ intents.members = True
 bot = commands.Bot(command_prefix='&', intents = intents)
 bot.remove_command('help')
 idchannel = 844796497157423114
+#서예은 방 
 tae = 298333126143377419
 
 @bot.event
