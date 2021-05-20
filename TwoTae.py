@@ -168,7 +168,15 @@ async def leave(ctx):
 @bot.command(pass_context=True, aliases=['p'])
 # 노래 재생
 async def play(ctx, url: str):
+    channel = ctx.message.author.voice.channel
+    voice = get(bot.voice_clients, guild=ctx.guild)
     song_there = os.path.isfile("song.mp3")
+    
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+    
     try:
         if song_there:
             os.remove("song.mp3")
@@ -200,7 +208,7 @@ async def play(ctx, url: str):
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.06
 
-    nname = name.rsplit("-", 2)
+    nname = name.rsplit('-', 1)
     await ctx.send(f"Playing: {nname[0]}")
 
 @bot.command(pass_context=True, aliases=['pa','pau'])
@@ -237,7 +245,7 @@ async def skip(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
     if voice and voice.is_playing():
-        voice.stop
+        voice.stop()
         embed = discord.Embed(title='재생중인 노래를 스킵합니다.', description=' ', color=0xFAFD40)
         await ctx.send(embed = embed)
     else:
