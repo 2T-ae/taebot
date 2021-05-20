@@ -1,5 +1,4 @@
 discord.py==1.7.1
-asyncio==3.4.3
 youtube_dl==2021.5.16
 ffmpeg==1.4
 discord==1.0.1
