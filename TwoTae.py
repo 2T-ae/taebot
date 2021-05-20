@@ -46,6 +46,7 @@ async def help(ctx, arg):
         embed.add_field(name='&DM', value='`이테를 디엠으로 부를 수 있습니다.`', inline=True)
         embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
         embed.add_field(name='&노래추천', value='`이테가 선정한 노래를 추천 받을 수 있다 (매일 바뀐다) [ 아직 미완 ]`', inline=True)
+        embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있다`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'music':
         # help music를 사용했을때 출력 될 임베드
@@ -100,6 +101,10 @@ async def _avatar(ctx, member : discord.Member=None):
         embed2.set_image(url=member.avatar_url)
         embed2.set_author(name=f'{member}', icon_url=member.avatar_url)
         await ctx.send(embed = embed2)
+        
+@bot.command()
+async def 초대(ctx):
+    await ctx.send(f'{ctx.message.author.mention}Tae봇의 초대링크입니다. https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=8&scope=bot')
 
 @bot.event
 async def on_member_join(member):
