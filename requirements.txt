@@ -3,4 +3,3 @@ asyncio==3.4.3
 youtube-dl==2021.5.16
 ffmpeg==1.4
 discord==1.0.1
-
