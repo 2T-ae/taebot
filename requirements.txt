@@ -1,2 +1,3 @@
 discord.py==1.7.1
 youtube_dl
+asyncio==3.4.3
