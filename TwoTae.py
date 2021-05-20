@@ -14,7 +14,7 @@ intents = discord.Intents.all()
 intents.members = True 
 bot = commands.Bot(command_prefix='&', intents = intents)
 bot.remove_command('help')
-idchannel = 837332811831967804
+idchannel = 844796497157423114
 tae = 298333126143377419
 
 @bot.event
