@@ -104,7 +104,7 @@ async def _avatar(ctx, member : discord.Member=None):
         
 @bot.command()
 async def 초대(ctx):
-    await ctx.send(f'{ctx.message.author.mention}Tae봇의 초대링크입니다. https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=8&scope=bot')
+    await ctx.send(f'{ctx.message.author.mention} Tae봇의 초대링크입니다. https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=8&scope=bot')
 
 @bot.event
 async def on_member_join(member):
