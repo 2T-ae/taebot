@@ -47,6 +47,7 @@ async def help(ctx, arg):
         embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
         embed.add_field(name='&노래추천', value='`이테가 선정한 노래를 추천 받을 수 있다 (매일 바뀐다) [ 아직 미완 ]`', inline=True)
         embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있다`', inline=True)
+        embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있다.`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'music':
         # help music를 사용했을때 출력 될 임베드
