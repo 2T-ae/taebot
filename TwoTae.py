@@ -1,13 +1,17 @@
 import discord
 from discord import message
 from discord import colour
+from discord import channel
 from discord.colour import Color
 from discord.embeds import Embed
 from discord.ext import commands, tasks
+from discord.flags import alias_flag_value
+from discord.utils import get
 import asyncio
 import random
 import os
-import dbdmusic
+import youtube_dl
+from discord.ext.commands.errors import MissingPermissions
 
 from discord.mentions import AllowedMentions
 
@@ -16,17 +20,22 @@ intents.members = True
 bot = commands.Bot(command_prefix='&', intents = intents, lavalinkpass = "yourpass", lavalinkport = 6969)
 bot.remove_command('help')
 idchannel = 844796497157423114
-#서예은 방 채널아이디
+#서예은 방 입퇴장 채널
 tae = 298333126143377419
 
 @bot.event
 async def on_ready():
-    # 프로그램 실행 시 초기 구성
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))  
+    # 프로그램 실행 시 초기 구성  
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
+    await asyncio.sleep(30)
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Made by 2Tae#0001"))
+    await asyncio.sleep(30)
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
+    await asyncio.sleep(30)
 
 @bot.command()  
 async def 도움말(ctx):
@@ -91,18 +100,24 @@ async def 노래추천(ctx):
         return
 
 @bot.command()
+@commands.has_permissions(mention_everyone=True)
+async def 모여(ctx, *, args=None):
+    if args !=None:
+        await ctx.channel.send('@everyone ' + args + ' 할 사람 모여라!')
+        await ctx.channel.send(f'`{ctx.message.author.name}`님이 모여 명령어를 사용했습니다!')
+
+@bot.command()
+@commands.has_permissions(manage_messages=True)
 async def 청소(ctx,amount:int):
-    try:
         await ctx.channel.purge(limit=int(amount+1))
-        await ctx.send(f'{amount}개의 메세지를 청소했습니다!')
-    except ValueError:
-        await ctx.send('청소 할 메세지의 수를 입력해주세요!')
-        return
+        msg = await ctx.send(f'{amount}개의 메세지를 청소했습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
 
 @bot.command(name='avatar', aliases=['av'])
 async def _avatar(ctx, member : discord.Member=None):
     if member is None:
-        embed = discord.Embed(title='이 명령어의 사용법은 `&avatar or av @member`입니다', colour=0xff0000, timestamp=ctx.message.created_at)
+        embed = discord.Embed(title='이 명령어의 사용법은 `&avatar or &av @member`입니다', colour=0xFAFD40, timestamp=ctx.message.created_at)
         await ctx.send(embed = embed)
         return
     else:
@@ -115,6 +130,121 @@ async def _avatar(ctx, member : discord.Member=None):
 async def 초대(ctx):
     await ctx.send(f'{ctx.message.author.mention} Tae봇의 초대링크입니다. https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=8&scope=bot')
 
+
+@bot.command(pass_context=True, aliases=['j'])
+# 통화방 들어오게 하기 
+async def join(ctx):
+    global voice
+    channel = ctx.message.author.voice.channel
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+
+    await voice.disconnect()
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        voice = await channel.connect()
+
+    await ctx.send(f'**Joined `{channel}`**')
+
+@bot.command(pass_context=True, aliases=['l', 'lea'])
+# 통화방 나가게 하기
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.disconnect()
+        await ctx.send('**Successfully disconnected**')
+    else:
+        embed = discord.Embed(title='저는 통화방에 들어가있지 않아요.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+
+@bot.command(pass_context=True, aliases=['p'])
+# 노래 재생
+async def play(ctx, url: str):
+    song_there = os.path.isfile("song.mp3")
+    try:
+        if song_there:
+            os.remove("song.mp3")
+    except PermissionError:
+        await ctx.send('ERROR: Music playing')
+        return
+
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            name = file
+            os.rename(file, "song.mp3")
+
+    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print(''))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.06
+
+    nname = name.rsplit("-", 2)
+    await ctx.send(f"Playing: {nname[0]}")
+
+@bot.command(pass_context=True, aliases=['pa','pau'])
+# 노래 중단
+async def pause(ctx):
+
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        voice.pause()
+        embed = discord.Embed(title='재생중이던 노래가 멈췄습니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+    else:
+        embed = discord.Embed(title='노래가 재생중이지 않습니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+
+@bot.command(pass_context=True, aliases=['r','res'])
+# 노래 다시 재생
+async def resume(ctx):
+
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_paused():
+        voice.resume()
+        embed = discord.Embed(title='노래를 다시 재생합니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+    else:
+        embed = discord.Embed(title='노래가 중단되지 않았습니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+
+@bot.command(pass_context=True, aliases=['s', 'ski'])
+async def skip(ctx):
+
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        voice.stop
+        embed = discord.Embed(title='재생중인 노래를 스킵합니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+    else:
+        embed = discord.Embed(title='스킵할 노래가 없습니다.', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+
+
 @bot.event
 async def on_member_join(member):
     # 서버에 멤버가 들어왔을 때 실행 될 이벤트
@@ -124,6 +254,18 @@ async def on_member_join(member):
 async def on_member_remove(member):
         # 서버에서 멤버가 나갔을 때 실행 될 이벤트
     await bot.get_channel(idchannel).send(f'{member.mention}님이 서버에서 나가셨어요.')
+
+@청소.error
+async def purge_error(ctx, error):
+    if isinstance(error, MissingPermissions):
+        await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+    if isinstance(error, ValueError):
+        await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+
+@모여.error
+async def send_error(ctx, error):
+    if isinstance(error,MissingPermissions):
+        await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
 
 access_token = os.environ["BOT_TOKEN"]
 
