@@ -44,6 +44,7 @@ async def help(ctx, arg):
         embed.add_field(name='&도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
         embed.add_field(name='&DM', value='`이테를 디엠으로 부를 수 있습니다.`', inline=True)
         embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
+        embed.add_field(name='&노래추천', value='`이테가 선정한 노래를 추천 받을 수 있다 (매일 바뀐다) [ 아직 미완 ]`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'music':
         # help music를 사용했을때 출력 될 임베드
