@@ -34,6 +34,7 @@ async def 도움말(ctx):
     embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
     embed.add_field(name='Commands', value='`&help command`', inline=True)
     embed.add_field(name='Music', value='`&help music`', inline=True)
+    embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
     await ctx.send(embed = embed)
 
 @bot.command()
@@ -55,6 +56,12 @@ async def help(ctx, arg):
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
         embed.add_field(name='&j', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
         embed.add_field(name='&p <노래 이름 혹은 url>', value='`봇을 통해 노래를 재생할 수 있습니다.`', inline=True)
+        await ctx.send(embed = embed)
+    if arg == 'misc':
+        # help misc를 사용했을때 출력 될 임베드
+        embed = discord.Embed(title='Misc', description='Tae Bot Misc Commands', color=0xFAFD40)
+        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 아바타를 얻을 수 있습니다.`', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
