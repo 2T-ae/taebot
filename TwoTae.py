@@ -25,6 +25,7 @@ bot.remove_command('help')
 idchannel = 844796497157423114
 #서예은 방 입퇴장 채널
 tae = 298333126143377419
+announcechannel = 845300908967329843
 
 @bot.event
 async def on_ready():
@@ -122,10 +123,10 @@ async def 공지(ctx, *, args=None):
         time = f'{str(now.year)}/{str(now.month)}/{str(now.day)}'
         dm_channel = await ctx.message.author.create_dm()
         await ctx.channel.purge(limit=1)
-        embed = discord.Embed(title=f'{ctx.guild}에서 전송한 공지입니다', description=' ', color=0xFAFD40)
+        embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
         embed.add_field(name=(args), value='** **', inline=False)
         embed.set_footer(text='작성자: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
-        await ctx.send(embed = embed)
+        await bot.get_channel(announcechannel).send(embed = embed)
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
         embed2.add_field(name=f'`{args}`' + ' 라는 공지를 보냈습니다.', value='** **', inline=False)
