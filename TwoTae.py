@@ -2,8 +2,11 @@ import discord
 import asyncio
 import random
 import os
+import datetime
 import youtube_dl
 import shutil
+import json
+from discord import activity
 from discord import message
 from discord import colour
 from discord import channel
@@ -13,12 +16,11 @@ from discord.ext import commands, tasks
 from discord.flags import alias_flag_value
 from discord.utils import get
 from discord.ext.commands.errors import MissingPermissions
-
 from discord.mentions import AllowedMentions
 
 intents = discord.Intents.all()
 intents.members = True 
-bot = commands.Bot(command_prefix='&', intents = intents, lavalinkpass = "yourpass", lavalinkport = 6969)
+bot = commands.Bot(command_prefix='&', intents = intents)
 bot.remove_command('help')
 idchannel = 844796497157423114
 #서예은 방 입퇴장 채널
@@ -31,12 +33,17 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
-    await asyncio.sleep(30)
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Made by 2Tae#0001"))
-    await asyncio.sleep(30)
-    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
-    await asyncio.sleep(30)
+    bot.loop.create_task(status_task())
+
+@bot.event
+async def status_task():
+   while True:
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
+        await asyncio.sleep(30)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Made by 2Tae#0001"))
+        await asyncio.sleep(30)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
+        await asyncio.sleep(30)
 
 @bot.command()  
 async def 도움말(ctx):
@@ -108,6 +115,26 @@ async def 모여(ctx, *, args=None):
         await ctx.channel.send(f'`{ctx.message.author.name}`님이 모여 명령어를 사용했습니다!')
 
 @bot.command()
+@commands.has_permissions(administrator=True)
+async def 공지(ctx, *, args=None):
+    if args !=None:
+        now = datetime.datetime.now()
+        time = f'{str(now.year)}/{str(now.month)}/{str(now.day)}'
+        dm_channel = await ctx.message.author.create_dm()
+        await ctx.channel.purge(limit=1)
+        embed = discord.Embed(title=f'{ctx.guild}에서 전송한 공지입니다', description=' ', color=0xFAFD40)
+        embed.add_field(name=(args), value='** **', inline=False)
+        embed.set_footer(text='작성자: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
+        await ctx.send(embed = embed)
+        msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
+        embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
+        embed2.add_field(name=f'`{args}`' + ' 라는 공지를 보냈습니다.', value='** **', inline=False)
+        embed2.set_footer(text=f'{time} at {ctx.guild}')
+        await dm_channel.send(embed = embed2)
+        await asyncio.sleep(5)
+        await msg.delete()
+
+@bot.command()
 @commands.has_permissions(manage_messages=True)
 async def 청소(ctx,amount:int):
         await ctx.channel.purge(limit=int(amount+1))
@@ -132,44 +159,43 @@ async def 초대(ctx):
     await ctx.send(f'{ctx.message.author.mention} Tae봇의 초대링크입니다. https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=8&scope=bot')
 
 
-@bot.command(pass_context=True, aliases=['j'])
+@bot.command(aliases=['j'])
 # 통화방 들어오게 하기 
 async def join(ctx):
     global voice
-    channel = ctx.message.author.voice.channel
-    voice = get(bot.voice_clients, guild=ctx.guild)
+    try:
+        channel = ctx.message.author.voice.channel
+        voice = get(bot.voice_clients, guild=ctx.guild)
+        if voice and voice.is_connected():
+            await ctx.send('이미 다른 통화방에 연결되어 있습니다.')
+        else:
+            voice = await channel.connect()
+            await ctx.send(f'**Joined `{channel}`**')
+    except AttributeError:
+        await ctx.send('우선 통화방에 들어가고 나서 명령어를 실행해주세요!')
+        return
 
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-
-    await voice.disconnect()
-
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        voice = await channel.connect()
-
-    await ctx.send(f'**Joined `{channel}`**')
-
-@bot.command(pass_context=True, aliases=['l', 'lea'])
+@bot.command(aliases=['l', 'lea'])
 # 통화방 나가게 하기
 async def leave(ctx):
-    channel = ctx.message.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
-
     if voice and voice.is_connected():
         await voice.disconnect()
         await ctx.send('**Successfully disconnected**')
     else:
         embed = discord.Embed(title='저는 통화방에 들어가있지 않아요.', description=' ', color=0xFAFD40)
         await ctx.send(embed = embed)
+    
+    if voice and voice.is_disconnected():
+        embed = discord.Embed(title='**통화방에 들어온 뒤 연결끊기를 시도해주세요**', description=' ', color=0xFAFD40)
+        await ctx.send(embed = embed)
+    else:
+        return
 
-@bot.command(pass_context=True, aliases=['p'])
+@bot.command(aliases=['p'])
 # 노래 재생
 async def play(ctx, url: str):
-    
+
     def check_queue():
         Queue_infile = os.path.isdir("./Queue")
         if Queue_infile is True:
@@ -252,7 +278,7 @@ async def play(ctx, url: str):
     nname = name.rsplit('-', 1)
     await ctx.send(f"Playing: {nname[0]}")
 
-@bot.command(pass_context=True, aliases=['pa','pau'])
+@bot.command(aliases=['pa','pau'])
 # 노래 중단
 async def pause(ctx):
 
@@ -266,7 +292,7 @@ async def pause(ctx):
         embed = discord.Embed(title='노래가 재생중이지 않습니다.', description=' ', color=0xFAFD40)
         await ctx.send(embed = embed)
 
-@bot.command(pass_context=True, aliases=['r','res'])
+@bot.command(aliases=['r','res'])
 # 노래 다시 재생
 async def resume(ctx):
 
@@ -280,7 +306,7 @@ async def resume(ctx):
         embed = discord.Embed(title='노래가 중단되지 않았습니다.', description=' ', color=0xFAFD40)
         await ctx.send(embed = embed)
 
-@bot.command(pass_context=True, aliases=['s', 'ski'])
+@bot.command(aliases=['s', 'ski'])
 async def skip(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -296,7 +322,7 @@ async def skip(ctx):
 
 queues = {}
 
-@bot.command(pass_context=True, aliases=['q', 'que'])
+@bot.command(aliases=['q', 'que'])
 async def queue(ctx, url: str):
     Queue_infile = os.path.isdir("./Queue")
     if Queue_infile is False:
@@ -327,8 +353,7 @@ async def queue(ctx, url: str):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         print("Downloading audio now\n")
         ydl.download([url])
-        await ctx.send("노래를 " + str(q_num) + "번에 추가했습니다.")
-
+        await ctx.send("노래를 " + str(q_num) + "번에 추가했습니다.")    
 
 @bot.event
 async def on_member_join(member):
@@ -351,6 +376,7 @@ async def purge_error(ctx, error):
 async def send_error(ctx, error):
     if isinstance(error,MissingPermissions):
         await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        return
 
 access_token = os.environ["BOT_TOKEN"]
 
