@@ -54,6 +54,7 @@ async def 도움말(ctx):
     embed.add_field(name='Commands', value='`&help command`', inline=True)
     embed.add_field(name='Music', value='`&help music`', inline=True)
     embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
+    embed.add_field(name='Moderator', value='`&help moderator`', inline=True)
     await ctx.send(embed = embed)
 
 @bot.command()
@@ -64,15 +65,18 @@ async def help(ctx, arg):
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
         embed.add_field(name='&도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
         embed.add_field(name='&DM', value='`이테를 디엠으로 부를 수 있습니다.`', inline=True)
-        embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
         embed.add_field(name='&노래추천', value='`이테가 선정한 노래를 추천 받을 수 있다 (매일 바뀐다) [ 아직 미완 ]`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'music':
         # help music를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Music', description='Tae Bot Music Commands', color=0xFAFD40)
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
-        embed.add_field(name='&j', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
-        embed.add_field(name='&p <노래 이름 혹은 url>', value='`봇을 통해 노래를 재생할 수 있습니다.`', inline=True)
+        embed.add_field(name='&join', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
+        embed.add_field(name='&play <url>', value='`봇을 통해 노래를 재생할 수 있습니다. (검색 추가 구현 예정)`', inline=True)
+        embed.add_field(name='&queue <url>', value='`봇을 통해 다음에 추가될 노래를 추가할 수 있습니다. (검색 추가 구현 예정)`', inline=True)
+        embed.add_field(name='&skip', value='`지금 재생 중인 노래를 건너 뛸 수 있습니다. (검색 추가 구현 예정)`', inline=True)
+        embed.add_field(name='&pause', value='`재생 중인 노래를 중단할 수 있습니다.`', inline=True)
+        embed.add_field(name='&resume', value='`중단되있던 노래를 다시 재생할 수 있습니다.`', inline=True) 
         await ctx.send(embed = embed)
     if arg == 'misc':
         # help misc를 사용했을때 출력 될 임베드
@@ -81,6 +85,13 @@ async def help(ctx, arg):
         embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있다`', inline=True)
         embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있다.`', inline=True)
         embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 아바타를 얻을 수 있습니다.`', inline=True)
+        await ctx.send(embed = embed)
+    if arg == 'moderator':
+        # help moderator를 사용했을때 출력 될 임베드
+        embed = discord.Embed(title='Moderator', description='Tae Bot Moderator Commands', color=0xFAFD40)
+        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.add_field(name='&공지', value='`&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있다.`', inline=True)
+        embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
