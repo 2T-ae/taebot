@@ -369,15 +369,35 @@ async def on_member_remove(member):
 @청소.error
 async def purge_error(ctx, error):
     if isinstance(error, MissingPermissions):
-        await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        msg2 = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg2.delete()
     if isinstance(error, ValueError):
-        await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+        msg = await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+        await asyncio.sleep(5)
+        await msg.delete()
 
 @모여.error
 async def send_error(ctx, error):
-    if isinstance(error,MissingPermissions):
-        await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
-        return
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
+    if isinstance(error, ValueError):
+        msg2 = await ctx.send('값을 제대로 입력해주세요!')
+        await asyncio.sleep(5)
+        await msg2.delete()
+
+@공지.error
+async def send_error(ctx, error):
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
+    if isinstance(error, ValueError):
+        error_msg = await ctx.send('공지 할 메세지를 제대로 입력해주세요!')
+        await asyncio.sleep(5)
+        await error_msg.delete()
 
 access_token = os.environ["BOT_TOKEN"]
 
