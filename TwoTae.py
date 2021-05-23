@@ -359,7 +359,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         nodes = {'MAIN': {'host': 'twotaebot.herokuapp.com',
                           'port': 8080,
-                          'rest_uri': 'http://twotaebot.herokuapp.com',
+                          'rest_uri': 'http://twotaebot.herokuapp.com:8080',
                           'password': 'taelavalink',
                           'identifier': 'MAIN',
                           'region': 'south_korea'
