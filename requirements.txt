@@ -2,3 +2,4 @@ discord.py==1.7.1
 youtube_dl
 asyncio==3.4.3
 pynacl==1.4.0
+wavelink==0.9.9
