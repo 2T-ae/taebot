@@ -121,6 +121,7 @@ async def 노래추천(ctx):
 async def 옌(ctx):
     user = await ctx.get_user("382891982382563328").create_dm()382891982382563328
     await user.send("잘자 옝니")
+    print("COMPLETE")
     
 @bot.command()
 @commands.has_permissions(mention_everyone=True)
