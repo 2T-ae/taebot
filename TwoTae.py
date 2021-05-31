@@ -5,7 +5,6 @@ import os
 import datetime
 import shutil
 import json
-from discord import activity
 from discord import message
 from discord import colour
 from discord import channel
@@ -13,8 +12,9 @@ from discord.colour import Color
 from discord.embeds import Embed
 from discord.ext import commands, tasks
 from discord.flags import alias_flag_value
+from discord.user import User
 from discord.utils import get
-from discord.ext.commands.errors import MissingPermissions
+from discord.ext.commands.errors import BadArgument, CommandNotFound, MissingPermissions, MissingRequiredArgument
 from discord.mentions import AllowedMentions
 
 intents = discord.Intents.all()
@@ -44,6 +44,10 @@ async def status_task():
         await asyncio.sleep(30)
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
         await asyncio.sleep(30)
+
+@bot.event
+async def on_command_error(ctx: commands.Context, exception: Exception):
+    print(f"Error occured - {type(exception).__name__} : {exception}")
 
 @bot.command()  
 async def 도움말(ctx):
@@ -82,27 +86,29 @@ async def help(ctx, arg):
         embed = discord.Embed(title='Misc', description='Tae Bot Misc Commands', color=0xFAFD40)
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
         embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있다`', inline=True)
-        embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있다.`', inline=True)
+        embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있다. \n\n필요한 권한 : 메세지 관리`', inline=True)
         embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 아바타를 얻을 수 있습니다.`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Moderator', description='Tae Bot Moderator Commands', color=0xFAFD40)
         embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
-        embed.add_field(name='&공지', value='`&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있다.`', inline=True)
-        embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다.`', inline=True)
+        embed.add_field(name='&공지', value='`&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있다. \n\n필요한 권한 : 어드민 권한`', inline=True)
+        embed.add_field(name='&모여', value='`&모여 <할 것> 을 통해 서버에 있는 유저들을 호출 할 수 있습니다. \n\n필요한 권한 : 에브리원 멘션 권한`', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
-async def DM(ctx):
+# 이테 호출
+async def 호출(ctx):
     user = await bot.get_user(tae)
-    if user.status == discord.Status.offline:
-        await ctx.send('2Tae님이 오프라인 상태이기 때문에 DM을 보낼 수 없습니다.')
+    if user is discord.Status.offline:
+        await ctx.send('2Tae님이 오프라인 상태이기 때문에 호출 할 수 없습니다.')
     else:
-        await bot.get_user(tae).send(f'{user.mention}님, {ctx.message.author}님이 DM 명령어를 사용했습니다!')
+        await bot.get_user(tae).send(f'{user.mention}님, {ctx.message.author}님이 당신을 부르고 있습니다!')
         await ctx.send('2Tae님이 온라인 상태여서 DM을 전송했습니다.')
 
 @bot.command()
+# 랜덤 노래추천
 async def 노래추천(ctx):
     try:
         dm_channel = await ctx.message.author.create_dm()
@@ -119,59 +125,76 @@ async def 노래추천(ctx):
         return
 
 @bot.command()
-async def 옌(ctx):
-    user = await bot.get_user(382891982382563328).create_dm()
-    await user.send("잘자 옝니")
-    print("COMPLETE")
-    
-@bot.command()
 @commands.has_permissions(mention_everyone=True)
+# everyone 명령어
 async def 모여(ctx, *, arg):
-    try:
-        if arg is None:
-            await ctx.channel.send('@everyone ' + arg + ' 할 사람 모여라!')
-            await ctx.channel.send(f'`{ctx.message.author.name}`님이 모여 명령어를 사용했습니다!')
-    except ValueError:
-        msg = await ctx.send('값을 제대로 입력해주세요!')
-        await asyncio.sleep(5)
-        await msg.delete()
+    if arg is None:
+        await ctx.channel.send('@everyone ' + arg + ' 할 사람 모여라!')
+        await ctx.channel.send(f'`{ctx.message.author.name}`님이 모여 명령어를 사용했습니다!')
 
 @bot.command()
 @commands.has_permissions(administrator=True)
+# 공지사항 embed 전송 명령어
 async def 공지(ctx, *, arg):
-    if arg is None:
-        error_msg = await ctx.send('공지 할 메세지를 제대로 입력해주세요!')
-        await asyncio.sleep(5)
-        await error_msg.delete()
-    else:
-        now = datetime.datetime.now()
-        time = f'{str(now.year)}/{str(now.month)}/{str(now.day)}'
-        dm_channel = await ctx.message.author.create_dm()
-        await ctx.channel.purge(limit=1)
-        embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
-        embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text='작성자: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
-        await bot.get_channel(announcechannel).send(embed = embed)
-        msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
-        embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
-        embed2.add_field(name=f'`{arg}`' + ' 라는 공지를 보냈습니다.', value='** **', inline=False)
-        embed2.set_footer(text=f'{time} at {ctx.guild}')
-        await dm_channel.send(embed = embed2)
-        await asyncio.sleep(5)
-        await msg.delete()
+    now = datetime.datetime.now()
+    time = f'{str(now.year)}/{str(now.month)}/{str(now.day)}'
+    dm_channel = await ctx.message.author.create_dm()
+    await ctx.channel.purge(limit=1)
+    embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
+    embed.add_field(name=(arg), value='** **', inline=False)
+    embed.set_footer(text='작성자: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
+    await bot.get_channel(announcechannel).send(embed = embed)
+    msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
+    embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
+    embed2.add_field(name=f'`{arg}`' + ' 라는 공지를 보냈습니다.', value='** **', inline=False)
+    embed2.set_footer(text=f'{time} at {ctx.guild}')
+    await dm_channel.send(embed = embed2)
+    await asyncio.sleep(5)
+    await msg.delete()
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
 async def 청소(ctx,amount:int):
-    try:
         await ctx.channel.purge(limit=int(amount+1))
         msg = await ctx.send(f'{amount}개의 메세지를 청소했습니다!')
         await asyncio.sleep(5)
         await msg.delete()
-    except ValueError:
-        msg2 = await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+
+@bot.command()
+async def 옌(ctx, *, arg):
+    user = await bot.get_user(382891982382563328).create_dm()
+    now = datetime.datetime.now()
+    time = f'{str(now.year)}년|{str(now.month)}월|{str(now.day)}일 {str(now.hour)}시{str(now.minute)}분'
+    if arg is None:
+            error_msg = await ctx.send('보낼 메세지를 제대로 입력해주세요')
+            await asyncio.sleep(5)
+            await error_msg.delete
+    else:
+        # DM을 발송한 사람에게 전송되는 Embed
+        dm = await ctx.message.author.create_dm()
+        await ctx.channel.purge(limit=1)
+        msg = await ctx.send(f'{ctx.author.mention}, 성공적으로 메세지를 전송했습니다.')
         await asyncio.sleep(5)
-        await msg2.delete()
+        await msg.delete()
+        embed2 = discord.Embed(title='발송한 메세지 기록', description=' ', color=0xFAFD40)
+        embed2.add_field(name=(arg), value=f'{time}에 발송한 메세지입니다.')
+        await dm.send(embed = embed2)
+        # 전송될 메세지 Embed
+        dm_for_user = await user.send(f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 5초 뒤에 표시됩니다.')
+        await asyncio.sleep(1)
+        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 4초 뒤에 표시됩니다.')
+        await asyncio.sleep(1)
+        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 3초 뒤에 표시됩니다.')
+        await asyncio.sleep(1)
+        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 2초 뒤에 표시됩니다.')
+        await asyncio.sleep(1)
+        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 1초 뒤에 표시됩니다.')
+        await asyncio.sleep(1)
+        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 5초가 지났습니다 메세지를 표시합니다.')
+        await asyncio.sleep(0.5)
+        embed = discord.Embed(title='Message', description=' ', color=0xFAFD40)
+        embed.add_field(name=(arg), value='** **', inline=False)
+        await user.send(embed = embed)
 
 @bot.command(name='avatar', aliases=['av'])
 async def _avatar(ctx, member : discord.Member=None):
@@ -196,7 +219,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-        # 서버에서 멤버가 나갔을 때 실행 될 이벤트
+    # 서버에서 멤버가 나갔을 때 실행 될 이벤트
     await bot.get_channel(idchannel).send(f'{member.mention}님이 서버에서 나가셨어요.')
 
 @청소.error
@@ -205,6 +228,14 @@ async def purge_error(ctx, error):
         msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
+    if isinstance(error, MissingRequiredArgument):
+        msg2 = await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+        await asyncio.sleep(5)
+        await msg2.delete()
+    if isinstance(error, BadArgument):
+        msg3 = await ctx.send('숫자를 입력해주세요! (ex:1,2,3...)')
+        await asyncio.sleep(5)
+        await msg3.delete()
 
 @모여.error
 async def send_error(ctx, error):
@@ -212,13 +243,28 @@ async def send_error(ctx, error):
         msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
+    if isinstance(error, MissingRequiredArgument):
+        msg2 = await ctx.send('값을 제대로 입력해주세요!')
+        await asyncio.sleep(5)
+        await msg2.delete()
 
 @공지.error
 async def send_error(ctx, error):
-        if isinstance(error, MissingPermissions):
-            msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
-            await asyncio.sleep(5)
-            await msg.delete()
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
+    if isinstance(error, MissingRequiredArgument):
+        error_msg = await ctx.send('공지 할 메세지를 제대로 입력해주세요!')
+        await asyncio.sleep(5)
+        await error_msg.delete()
+
+@옌.error
+async def send_error(ctx,error):
+    if isinstance(error, MissingRequiredArgument):
+        msg = await ctx.send('보낼 메세지를 제대로 입력해주세요!')
+        await asyncio.sleep(5)
+        await msg.delete()
 
 access_token = os.environ["BOT_TOKEN"]
 
