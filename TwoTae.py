@@ -117,7 +117,11 @@ async def 노래추천(ctx):
     except:
         await ctx.send(f'{ctx.message.author.mention} DM을 전송하는데 실패했습니다. 디스코드 설정에서 `개인정보 보호 및 보안`에 들어가서 `서버 멤버가 보내는 개인 메세지 허용하기`를 켜주신 후에 다시 시도해주세요!')
         return
-
+@bot.command()
+async def 옌(ctx)
+    user = await ctx.get_user("382891982382563328").create_dm()382891982382563328
+    await user.send("잘자 옝니")
+    
 @bot.command()
 @commands.has_permissions(mention_everyone=True)
 async def 모여(ctx, *, arg):
