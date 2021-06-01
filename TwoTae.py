@@ -85,7 +85,7 @@ async def on_member_join(member):
         welcome_dict = json.load(f)
 
     welcome = welcome_dict[str(member.guild.id)]
-    await bot.get_channel(int(welcome)).send(f'{member.mention}님, {member.guild.name} 서버에 오신것을 환영합니다! 이 서버에 계시는 동안 많이 즐겨주세요!🎉')
+    await bot.get_channel(int(welcome)).send(f'{member.mention}님, {member.guild.name} 서버에 오신것을 환영합니다!')
 
 @bot.event
 async def on_member_leave(member):
@@ -96,7 +96,7 @@ async def on_member_leave(member):
         leave_dict = json.load(f)
 
     leave = leave_dict[str(member.guild.id)]
-    await bot.get_channel(int(leave)).send.send(f'{member.name}님이 서버에서 나가셨습니다. 다음에 또 만나길 빌어요. 이 서버에 계신동안 즐거우셨길✨')
+    await bot.get_channel(int(leave)).send(f'{member.mention}님이 서버에서 나가셨습니다. 다음에 또 만나길 빌어요.')
 
 @bot.command()
 @commands.has_permissions(administrator = True)
