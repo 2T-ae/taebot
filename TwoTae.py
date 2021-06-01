@@ -22,7 +22,7 @@ def get_prefix(bot, message):
     with open("prefixes.json", "r") as f:
         prefixes = json.load(f)
 
-    return prefixes[str(message.guild.id)]
+    return prefixes[int(message.guild.id)]
 
 intents = discord.Intents.all()
 intents.members = True 
@@ -60,7 +60,7 @@ async def on_guild_join(guild):
     with open("prefixes.json", "r", encoding='utf-8') as f:
         prefixes = json.load(f)
 
-    prefixes[str(guild.id)] = "&"
+    prefixes[int(guild.id)] = "&"
 
     with open("prefixes.json", "w", encoding='utf-8') as f:
         json.dump(prefixes,f)
@@ -71,7 +71,7 @@ async def on_guild_join(guild):
     with open("announce.json", "r", encoding='utf-8') as f:
         announce = json.load(f)
 
-    announce[str(guild.id)] = None
+    announce[int(guild.id)] = None
 
     with open("announce.json", "w", encoding='utf-8') as f:
         json.dump(announce,f)
@@ -84,7 +84,7 @@ async def on_member_join(member):
     with open("welcome.json", "r", encoding='utf-8') as f:
         welcome_dict = json.load(f)
 
-    welcome = welcome_dict[str(member.guild.id)]
+    welcome = welcome_dict[int(member.guild.id)]
     await bot.get_channel(int(welcome)).send(f'{member.mention}님, {member.guild.name} 서버에 오신것을 환영합니다!')
 
 @bot.event
@@ -106,7 +106,7 @@ async def changeprefix(ctx, prefix):
     with open("prefixes.json", "r", encoding='utf-8') as f:
         prefixes = json.load(f)
 
-    prefixes[str(ctx.guild.id)] = prefix
+    prefixes[int(ctx.guild.id)] = prefix
 
     with open("prefixes.json", "w", encoding='utf-8') as f:
         json.dump(prefixes,f)
@@ -121,7 +121,7 @@ async def 공지채널(ctx, channel: discord.TextChannel):
     with open("announce.json", "r", encoding='utf-8') as f:
         announce = json.load(f)
 
-    announce[str(ctx.guild.id)] = str(channel.id)
+    announce[int(ctx.guild.id)] = str(channel.id)
 
     with open("announce.json", "w", encoding='utf-8') as f:
         json.dump(announce,f)
@@ -136,7 +136,7 @@ async def 입장(ctx, channel: discord.TextChannel):
     with open("welcome.json", "r", encoding='utf-8') as f:
         welcome = json.load(f)
 
-    welcome[str(ctx.guild.id)] = str(channel.id)
+    welcome[int(ctx.guild.id)] = str(channel.id)
 
     with open("welcome.json", "w", encoding='utf-8') as f:
         json.dump(welcome,f)
@@ -151,7 +151,7 @@ async def 퇴장(ctx, channel: discord.TextChannel):
     with open("leave.json", "r", encoding='utf-8') as f:
         leave = json.load(f)
 
-    leave[str(ctx.guild.id)] = str(channel.id)
+    leave[int(ctx.guild.id)] = str(channel.id)
 
     with open("leave.json", "w", encoding='utf-8') as f:
         json.dump(leave,f)
@@ -169,7 +169,7 @@ async def on_message(msg):
             with open("prefixes.json", "r", encoding='utf-8') as f:
                 prefixes = json.load(f)
 
-            pre = prefixes[str(msg.guild.id)]
+            pre = prefixes[int(msg.guild.id)]
 
             await msg.channel.send(f'My prefix for this server is `{pre}`! | Default = `&`')
 
