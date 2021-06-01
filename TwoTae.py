@@ -229,6 +229,7 @@ async def help(ctx, arg):
         embed.add_field(name='&입장', value='`&입장 #채널 을 통해 입장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
         embed.add_field(name='&퇴장', value='`&퇴장 #채널 을 통해 퇴장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
         embed.add_field(name='&changeprefix', value='`&changeprefix <봇을 사용할 칭호> 를 통해 서버에서 Tae봇을 사용할 때 쓸 칭호를 설정할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
+        embed.add_field(name='&slowmode', value='`&slowmode <초> 를 통해 해당 채널에 슬로우모드를 걸 수 있습니다. \n\n필요한 권한 : 채널 관리`', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
