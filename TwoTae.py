@@ -8,13 +8,17 @@ import json
 from discord import message
 from discord import colour
 from discord import channel
+from discord import gateway
+from discord import user
+from discord import client
 from discord.colour import Color
 from discord.embeds import Embed
 from discord.ext import commands, tasks
+from discord.ext.commands.core import has_permissions
 from discord.flags import alias_flag_value
 from discord.user import User
 from discord.utils import get
-from discord.ext.commands.errors import BadArgument, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
+from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
 from discord.mentions import AllowedMentions
 
 def get_prefix(bot, message):
@@ -96,7 +100,7 @@ async def on_member_leave(member):
         leave_dict = json.load(f)
 
     leave = leave_dict[str(member.guild.id)]
-    await bot.get_channel(int(leave)).send(f'{member.mention}님이 서버에서 나가셨습니다. 다음에 또 만나길 빌어요.')
+    await bot.get_channel(int(leave)).send.send(f'{member.name}님이 서버에서 나가셨습니다. 다음에 또 만나길 빌어요.')
 
 @bot.command()
 @commands.has_permissions(administrator = True)
@@ -228,6 +232,52 @@ async def help(ctx, arg):
         await ctx.send(embed = embed)
 
 @bot.command()
+@commands.has_permissions(administrator=True)
+async def gcreate(ctx, time=None, *, prize=None):
+    if time == None:
+        return await ctx.send('Please include a time!')
+    elif prize == None:
+        return await ctx.send('Please include a prize!')
+    embed = discord.Embed(title='New Giveaway!', description=f'{ctx.author.mention} is giving away **{prize}**!')
+    time_convert = {'s':1, 'm':60, 'h':3600, 'd':86400}
+    gawtime = int(time[0]) * time_convert[time[-1]]
+    embed.set_footer(text=f'Host: {ctx.author} | Ends in {time}')
+    await ctx.channel.purge(limit=1)
+    gaw_msg = await ctx.send(embed = embed)
+
+    await gaw_msg.add_reaction('🎉')
+    await asyncio.sleep(gawtime)
+
+    new_gaw_msg = await ctx.channel.fetch_message(gaw_msg.id)
+
+    users = await new_gaw_msg.reactions[1].users().flatten()
+    users.pop(users.index(bot.user))
+
+    winner = random.choice(users)
+
+    embed2 = discord.Embed(title='Giveaway', description=' ', color=0xFAFD40)
+    embed.add_field(name=f'🎁 **{prize}**', value='Host:')
+    embed.add_field(name=f':🏅 **Winner**:', value=f'{winner.mention}')
+
+    await ctx.send(embed = embed2)
+
+@bot.command()
+@commands.has_permissions(manage_channels=True)
+async def slowmode(ctx, time:int):
+    try:
+        if time == 0:
+            await ctx.send('Slowmode가 꺼졌습니다.')
+            await ctx.channel.edit(slowmode_delay = 0)
+        elif time > 21600:
+            await ctx.send('Slowmode는 6시간을 초과할 수 없습니다!')
+            return
+        else:
+            await ctx.channel.edit(slowmode_delay = time)
+            await ctx.send(f'Slowmode가 {time}초로 설정되었습니다.')
+    except:
+        pass
+
+@bot.command()
 # 랜덤 노래추천
 async def 노래추천(ctx):
     try:
@@ -346,25 +396,28 @@ async def purge_error(ctx, error):
         await msg.delete()
     # 인수가 비었을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
-        msg2 = await ctx.send('청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
+        msg2 = await ctx.send(f'{ctx.message.author.mention}, 청소 할 메세지의 수를 입력해주세요! (ex:1,2,3...)')
         await asyncio.sleep(5)
         await msg2.delete()
     # 숫자가 아닌 다른것들이 입력되었을 경우 출력 될 메세지 
     if isinstance(error, BadArgument):
-        msg3 = await ctx.send('숫자를 입력해주세요! (ex:1,2,3...)')
+        msg3 = await ctx.send(f'{ctx.message.author.mention}, 숫자를 입력해주세요! (ex:1,2,3...)')
         await asyncio.sleep(5)
         await msg3.delete()
 
 @공지.error
 async def send_error(ctx, error):
+    # administrator 권한이 없을 경우 출력 될 메세지
     if isinstance(error, MissingPermissions):
         msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
+    # 인수가 비었을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
-        error_msg = await ctx.send('공지 할 메세지를 제대로 입력해주세요!')
+        error_msg = await ctx.send(f'{ctx.message.author.mention}, 공지 할 메세지를 제대로 입력해주세요!')
         await asyncio.sleep(5)
         await error_msg.delete()
+    # 설정된 공지 채널이 없을 경우 출력 될 메세지
     if isinstance(error, CommandInvokeError):
         error_msg2 = await ctx.send(f'{ctx.message.author.mention}, 공지를 보낼 채널이 설정 되어있지 않습니다. 공지채널을 설정 한 이후 다시 시도해주세요.')
         await asyncio.sleep(5)
@@ -373,28 +426,60 @@ async def send_error(ctx, error):
 
 @옌.error
 async def send_error(ctx,error):
+    # 인수가 비었을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
-        msg = await ctx.send('보낼 메세지를 제대로 입력해주세요!')
+        msg = await ctx.send(f'{ctx.message.author.mention}, 보낼 메세지를 제대로 입력해주세요!')
         await asyncio.sleep(5)
         await msg.delete()
 
 @입장.error
 async def send_error(ctx, error):
+    # administrator 권한이 없을 경우 출력 될 메세지
     if isinstance(error, MissingPermissions):
         msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
+    # 인수가 비었을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
         msg2 = await ctx.send(f'{ctx.message.author.mention}, 입장로그를 전송할 채널을 제대로 선택해주세요! (ex. 입장 #<채널이름>)')
         await asyncio.sleep(5)
         await msg2.delete()
+    # 채널이 발견되지 않았을 경우 출력 될 메세지
+    if isinstance(error, ChannelNotFound):
+        msg3 = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
+        await asyncio.sleep(5)
+        await msg3.delete()
 
 @퇴장.error
 async def send_error(ctx, error):
-    if isinstance(error, MissingRequiredArgument):
-        msg = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
+    # administrator 권한이 없을 경우 출력 될 메세지
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
+    # 인수가 비었을 경우 출력 될 메세지
+    if isinstance(error, MissingRequiredArgument):
+        msg2 = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
+        await asyncio.sleep(5)
+        await msg2.delete()
+    # 채널이 발견되지 않았을 경우 출력 될 메세지
+    if isinstance(error, ChannelNotFound):
+        msg3 = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
+        await asyncio.sleep(5)
+        await msg3.delete()
+
+@slowmode.error
+async def send_error(ctx, error):
+    # manage_channels 권한이 없을 경우 출력 될 메세지
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
+    # 인수가 숫자가 아닐 경우 출력 될 메세지
+    if isinstance(error, BadArgument):
+        msg2 = await ctx.send(f'{ctx.message.author.mention}, 숫자를 입력해주세요! (ex. 1,2,3...)')
+        await asyncio.sleep(5)
+        await msg2.delete()
 
 access_token = os.environ["BOT_TOKEN"]
 
