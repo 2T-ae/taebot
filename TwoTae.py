@@ -5,6 +5,7 @@ import os
 import datetime
 import shutil
 import json
+from discord.member import Member
 import youtube_dl
 import math
 import functools
@@ -52,7 +53,7 @@ async def status_task():
    while True:
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
         await asyncio.sleep(30)
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="Made by 2Tae#0001"))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f"Made by Summer#5555"))
         await asyncio.sleep(30)
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
         await asyncio.sleep(30)
@@ -191,7 +192,7 @@ async def on_message(msg):
 async def 도움말(ctx):
     embed = discord.Embed(title='도움말', description=' ', color=0xFAFD40)
     embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
-    embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+    embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
     embed.add_field(name='Commands', value='`&help command`', inline=True)
     embed.add_field(name='Music', value='`&help music`', inline=True)
     embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
@@ -203,14 +204,14 @@ async def help(ctx, arg):
     if arg == 'command':
         # help commands를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Commands', description='Tae Bot Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         embed.add_field(name='도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
         embed.add_field(name='노래추천', value='`무작위로 노래를 추천 받을 수 있습니다 [ 미완 ]`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'music':
         # help music를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Music', description='Tae Bot Music Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         embed.add_field(name='&join or j', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
         embed.add_field(name='&play or p <이름 혹은 url>', value='`봇을 통해 노래를 재생할 수 있습니다.`', inline=True)
         embed.add_field(name='&queue', value='`봇을 통해 플레이리스트에 등록되있는 노래를 확인할 수 있습니다..`', inline=True)
@@ -223,14 +224,15 @@ async def help(ctx, arg):
     if arg == 'misc':
         # help misc를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Misc', description='Tae Bot Misc Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있습니다`', inline=True)
         embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 프로필 이미지를 얻을 수 있습니다.`', inline=True)
+        embed.add_field(name='&userinfo or 내정보', value='`내 디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역활 등)`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Moderator', description='Tae Bot Moderator Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         embed.add_field(name='&공지', value='`&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있습니다. <공지채널 명령어를 통한 채널 설정 필요> \n\n필요한 권한 : 어드민 권한`', inline=True)
         embed.add_field(name='&공지채널', value='`&공지채널 #채널 을 통해 공지를 보낼 채널을 설정할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
         embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있습니다. \n\n필요한 권한 : 메세지 관리`', inline=True)
@@ -295,7 +297,7 @@ async def 노래추천(ctx):
         embed.set_author(name='Mnet Official', icon_url='https://yt3.ggpht.com/ytc/AAUvwngh2Ctucs27ygguTKMB21kuat1zOoyvL41UFBtDxQ=s48-c-k-c0x00ffffff-no-rj')
         embed.set_thumbnail(url='https://musicmeta-phinf.pstatic.net/album/005/691/5691474.jpg?type=r120Fll&v=20210427090509')
         embed.set_image(url='https://i.ytimg.com/vi/kc7t4s78Hok/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBRIS1jpMSzFyyNbH3mkGVycsbzjw')
-        embed.set_footer(text='Made By 2Tae#0001', icon_url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
+        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         await dm_channel.send(f'{ctx.message.author.mention}님, 오늘의 추천 노래입니다!')
         await dm_channel.send(embed = embed)
         await ctx.send(f'{ctx.message.author.mention} 성공적으로 DM을 전송했습니다!')
@@ -378,7 +380,9 @@ async def 옌(ctx, *, arg):
 @bot.command(name='avatar', aliases=['av'])
 async def _avatar(ctx, member : discord.Member=None):
     if member is None:
-        embed = discord.Embed(title='이 명령어의 사용법은 `&avatar or &av @member`입니다', colour=0xFAFD40, timestamp=ctx.message.created_at)
+        embed = discord.Embed(title='Avatar', description='')
+        embed.set_image(url=ctx.author.avatar_url)
+        embed.set_author(name=f'{ctx.author}', icon_url=ctx.author.avatar_url)
         await ctx.send(embed = embed)
         return
     else:
@@ -386,6 +390,27 @@ async def _avatar(ctx, member : discord.Member=None):
         embed2.set_image(url=member.avatar_url)
         embed2.set_author(name=f'{member}', icon_url=member.avatar_url)
         await ctx.send(embed = embed2)
+
+    
+@bot.command(aliases=['내정보'])
+async def userinfo(ctx, *, user: discord.Member = None):
+    members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
+    if user is None:
+        user = ctx.author
+    date_format = "%a, %d %b %Y %I:%M %p"
+    embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+    embed.set_author(name=str(user), icon_url=user.avatar_url)
+    embed.set_thumbnail(url=user.avatar_url)
+    embed.add_field(name='현재 상태', value=f'{user.status}')
+    embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+    embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+    embed.add_field(name='현재 활동', value=f'{(user.activity)}', inline=False)
+    
+    if len(user.roles) > 1:
+        role_string = ' '.join([r.mention for r in user.roles][1:])
+        embed.add_field(name='소유중인 역할', value=role_string, inline=False)
+    embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
+    return await ctx.send(embed=embed)
 
 @bot.command()
 async def 초대(ctx):
