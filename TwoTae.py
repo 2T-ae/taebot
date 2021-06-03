@@ -5,7 +5,6 @@ import os
 import datetime
 import shutil
 import json
-from discord.member import Member
 import youtube_dl
 import math
 import functools
@@ -26,6 +25,7 @@ from discord.user import User
 from discord.utils import get
 from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
 from discord.mentions import AllowedMentions
+from discord.member import Member
 
 def get_prefix(bot, message):
 
@@ -54,6 +54,8 @@ async def status_task():
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
         await asyncio.sleep(30)
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f"Made by Summer#5555"))
+        await asyncio.sleep(30)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}개의 서버에서 사용되는중".format(len(bot.guilds))))
         await asyncio.sleep(30)
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
         await asyncio.sleep(30)
@@ -106,7 +108,7 @@ async def on_member_leave(member):
         leave_dict = json.load(f)
 
     leave = leave_dict[str(member.guild.id)]
-    await bot.get_channel(int(leave)).send.send(f'{member.name}님이 서버에서 나가셨습니다. 다음에 또 만나길 빌어요.')
+    await bot.get_channel(int(leave)).send.send(f'{member.name}님이 서버에서 나가셨습니다.')
 
 @bot.command()
 @commands.has_permissions(administrator = True)
@@ -227,7 +229,7 @@ async def help(ctx, arg):
         embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
         embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있습니다`', inline=True)
         embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 프로필 이미지를 얻을 수 있습니다.`', inline=True)
-        embed.add_field(name='&userinfo or 내정보', value='`내 디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역활 등)`', inline=True)
+        embed.add_field(name='&userinfo or 내정보', value='`내 디스코드 계정 or 멘션한 상대에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역활 등)`', inline=True)
         await ctx.send(embed = embed)
     if arg == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
@@ -323,7 +325,7 @@ async def 공지(ctx, *, arg):
         await ctx.channel.purge(limit=1)
         embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
         embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text='작성자: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
+        embed.set_footer(text='Sender: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
         await bot.get_channel(int(announce)).send(embed = embed)
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
@@ -404,8 +406,8 @@ async def userinfo(ctx, *, user: discord.Member = None):
     embed.add_field(name='현재 상태', value=f'{user.status}')
     embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
     embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-    embed.add_field(name='현재 활동', value=f'{(user.activity)}', inline=False)
-    
+    embed.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
+    embed.add_field(name='Discord Badge', value=f'Empty Now')
     if len(user.roles) > 1:
         role_string = ' '.join([r.mention for r in user.roles][1:])
         embed.add_field(name='소유중인 역할', value=role_string, inline=False)
@@ -514,6 +516,7 @@ async def send_error(ctx, error):
         msg2 = await ctx.send(f'{ctx.message.author.mention}, 숫자를 입력해주세요! (ex. 1,2,3...)')
         await asyncio.sleep(5)
         await msg2.delete()
+
 
 # Music Commands
 # Silence useless bug reports messages
@@ -723,7 +726,7 @@ class VoiceState:
         while True:
             self.next.clear()
 
-            if self.loop == False:
+            if not self.loop:
                 # Try to get the next song within 3 minutes.
                 # If no song will be added to the queue in time,
                 # the player will disconnect due to performance
@@ -739,7 +742,7 @@ class VoiceState:
                 self.current.source.volume = self._volume
                 self.voice.play(self.current.source, after=self.play_next_song)
                 await self.current.source.channel.send(embed=self.current.create_embed())
-            
+
             elif self.loop == True:
                 self.now = discord.FFmpegPCMAudio(self.current.source.stream_url, **YTDLSource.FFMPEG_OPTIONS)
                 self.voice.play(self.now, after=self.play_next_song)
