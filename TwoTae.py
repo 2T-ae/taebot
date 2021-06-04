@@ -5,6 +5,8 @@ import os
 import datetime
 import shutil
 import json
+from discord import member
+from discord import embeds
 import youtube_dl
 import math
 import functools
@@ -23,9 +25,8 @@ from discord.ext.commands.core import has_permissions
 from discord.flags import alias_flag_value
 from discord.user import User
 from discord.utils import get
-from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
+from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandError, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
 from discord.mentions import AllowedMentions
-from discord.member import Member
 
 def get_prefix(bot, message):
 
@@ -336,12 +337,31 @@ async def 공지(ctx, *, arg):
         await msg.delete()
 
 @bot.command()
+@commands.has_permissions(kick_members=True)
+async def 킥(ctx, member: discord.Member=None, *, reasons=None):
+    try:
+        now = datetime.datetime.now()
+        time = f'{str(now.year)}년/{str(now.month)}월/{str(now.day)}일 {str(now.hour)}시{str(now.minute)}분'
+        user = await bot.get_user(member.id).create_dm()
+        embed = discord.Embed(title='추방', description=f'Server: {ctx.guild.name}')
+        embed.add_field(name='사유', value=f'{reasons}')
+        embed.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
+        await user.send(embed = embed)
+        await member.kick(reason=reasons)
+        embed2 = discord.Embed(title='Result', description='처리 기록')
+        embed2.add_field(name=f'{member}가 추방되었습니다.', value=f'사유 : {reasons}')
+        embed2.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
+        await ctx.send(embed = embed2)
+    except CommandError:
+        return      
+
+@bot.command()
 @commands.has_permissions(manage_messages=True)
 async def 청소(ctx,amount:int):
-        await ctx.channel.purge(limit=int(amount+1))
-        msg = await ctx.send(f'{amount}개의 메세지를 청소했습니다!')
-        await asyncio.sleep(5)
-        await msg.delete()
+    await ctx.channel.purge(limit=int(amount+1))
+    msg = await ctx.send(f'{amount}개의 메세지를 청소했습니다!')
+    await asyncio.sleep(5)
+    await msg.delete()
 
 @bot.command()
 async def 옌(ctx, *, arg):
@@ -399,20 +419,37 @@ async def userinfo(ctx, *, user: discord.Member = None):
     members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
     if user is None:
         user = ctx.author
-    date_format = "%a, %d %b %Y %I:%M %p"
-    embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-    embed.set_author(name=str(user), icon_url=user.avatar_url)
-    embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name='현재 상태', value=f'{user.status}')
-    embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-    embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-    embed.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
-    embed.add_field(name='Discord Badge', value=f'Empty Now')
-    if len(user.roles) > 1:
-        role_string = ' '.join([r.mention for r in user.roles][1:])
-        embed.add_field(name='소유중인 역할', value=role_string, inline=False)
-    embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
-    return await ctx.send(embed=embed)
+        date_format = "%a, %d %b %Y %I:%M %p"
+        embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+        embed.set_author(name=str(user), icon_url=user.avatar_url)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name='현재 상태', value=f'{user.status}')
+        embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+        embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+        embed.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
+        embed.add_field(name='Discord Badge', value=f'Empty Now')
+        
+        if len(user.roles) > 1:
+            role_string = ' '.join([r.mention for r in user.roles][1:])
+            embed.add_field(name='소유중인 역할', value=role_string, inline=False)
+        embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
+        return await ctx.send(embed=embed)
+    else:
+        date_format = "%a, %d %b %Y %I:%M %p"
+        embed2 = discord.Embed(color=0xdfa3ff, title='USER INFO')
+        embed2.set_author(name=str(user), icon_url=user.avatar_url)
+        embed2.set_thumbnail(url=user.avatar_url)
+        embed2.add_field(name='현재 상태', value=f'{user.status}')
+        embed2.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+        embed2.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+        embed2.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
+        embed2.add_field(name='Discord Badge', value=f'Empty Now')
+        
+        if len(user.roles) > 1:
+            role_string = ' '.join([r.mention for r in user.roles][1:])
+            embed2.add_field(name='소유중인 역할', value=role_string, inline=False)
+        embed2.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
+        return await ctx.send(embed=embed2)
 
 @bot.command()
 async def 초대(ctx):
@@ -501,6 +538,23 @@ async def send_error(ctx, error):
     # 채널이 발견되지 않았을 경우 출력 될 메세지
     if isinstance(error, ChannelNotFound):
         msg3 = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
+        await asyncio.sleep(5)
+        await msg3.delete()
+
+@킥.error
+async def send_error(ctx, error):
+    # kick_members 권한이 없을 경우 출력 될 메세지
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
+    # 인수가 유저를 멘션하지 않았을 경우 출력 될 메세지
+    if isinstance(error, BadArgument):
+        msg2 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
+        await asyncio.sleep(5)
+        await msg2.delete()
+    if isinstance(error, CommandInvokeError):
+        msg3 = await ctx.send('명령어를 실행하는데 알 수 없는 문제가 발생했습니다.')
         await asyncio.sleep(5)
         await msg3.delete()
 
