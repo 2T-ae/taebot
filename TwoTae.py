@@ -5,12 +5,17 @@ import os
 import datetime
 import shutil
 import json
-from discord import member
-from discord import embeds
 import youtube_dl
 import math
 import functools
 import itertools
+from pytz import timezone
+from discord import member
+from discord import embeds
+from discord import activity
+from discord import Spotify
+from discord.enums import ActivityType
+from discord.ext.commands.converter import _get_from_guilds
 from async_timeout import timeout
 from discord import message
 from discord import colour
@@ -25,7 +30,7 @@ from discord.ext.commands.core import has_permissions
 from discord.flags import alias_flag_value
 from discord.user import User
 from discord.utils import get
-from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandError, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument
+from discord.ext.commands.errors import BadArgument, ChannelNotFound, CommandError, CommandInvokeError, CommandNotFound, MissingPermissions, MissingRequiredArgument, NotOwner
 from discord.mentions import AllowedMentions
 
 def get_prefix(bot, message):
@@ -39,6 +44,7 @@ intents = discord.Intents.all()
 intents.members = True 
 bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 bot.remove_command('help')
+owner = 298333126143377419
 
 @bot.event
 async def on_ready():
@@ -52,11 +58,13 @@ async def on_ready():
 @bot.event
 async def status_task():
    while True:
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&도움말 을 통해 명령어를 사용해보세요!"))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&help를 입력해보세요!"))
         await asyncio.sleep(30)
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f"Made by Summer#5555"))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f"Support to Summer#5555"))
         await asyncio.sleep(30)
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}개의 서버에서 사용되는중".format(len(bot.guilds))))
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}개의 서버와 함께해요!".format(len(bot.guilds))))
+        await asyncio.sleep(30)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}명의 유저와 함께해요!".format(len(bot.users))))
         await asyncio.sleep(30)
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
         await asyncio.sleep(30)
@@ -89,6 +97,14 @@ async def on_guild_join(guild):
     with open("announce.json", "w", encoding='utf-8') as f:
         json.dump(announce,f)
 
+    if guild.id(850168862959861780):
+        return
+    else:
+        overwrites = {
+        guild.default_role: discord.PermissionOverwrite(read_messages=True),
+        }
+        await guild.create_text_channel('Bot-Announcement', overwrites=overwrites, topic='봇-공지')
+
 @bot.event
 async def on_member_join(member):
     # 서버에 사람이 들어왔을 때 출력될 Welcome 메세지
@@ -98,10 +114,10 @@ async def on_member_join(member):
         welcome_dict = json.load(f)
 
     welcome = welcome_dict[str(member.guild.id)]
-    await bot.get_channel(int(welcome)).send(f'{member.mention}님, {member.guild.name} 서버에 오신것을 환영합니다!')
+    await bot.get_channel(int(welcome)).send(f'`{member}({member.id})`님이 서버에 들어왔습니다.')
 
 @bot.event
-async def on_member_leave(member):
+async def on_member_remove(member):
     # 서버에서 사람이 나갔을 때 출력될 Leave 메세지
 
 
@@ -109,7 +125,7 @@ async def on_member_leave(member):
         leave_dict = json.load(f)
 
     leave = leave_dict[str(member.guild.id)]
-    await bot.get_channel(int(leave)).send.send(f'{member.name}님이 서버에서 나가셨습니다.')
+    await bot.get_channel(int(leave)).send(f'`{member}`님이 서버에서 나가셨습니다.')
 
 @bot.command()
 @commands.has_permissions(administrator = True)
@@ -191,58 +207,56 @@ async def on_message(msg):
 
     await bot.process_commands(msg)
 
-@bot.command()  
-async def 도움말(ctx):
-    embed = discord.Embed(title='도움말', description=' ', color=0xFAFD40)
-    embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/837952773395841024/837952822527393802/rankong.png')
-    embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-    embed.add_field(name='Commands', value='`&help command`', inline=True)
-    embed.add_field(name='Music', value='`&help music`', inline=True)
-    embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
-    embed.add_field(name='Moderator', value='`&help moderator`', inline=True)
-    await ctx.send(embed = embed)
-
 @bot.command()
-async def help(ctx, arg):
-    if arg == 'command':
+async def help(ctx, *, args=None):
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    time = now_kst
+    print(time)
+    if args is None:
+        embed = discord.Embed(title='TaeBot Help', description=' ', color=0xFAFD40)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.add_field(name='Commands', value='`&help commands`', inline=True)
+        embed.add_field(name='Music', value='`&help music`', inline=True)
+        embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
+        embed.add_field(name='Moderator', value='`&help moderator`', inline=True)
+        await ctx.send(embed = embed)
+    if args == 'commands':
         # help commands를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Commands', description='Tae Bot Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-        embed.add_field(name='도움말', value='`도움말을 확인할 수 있습니다.`', inline=True)
-        embed.add_field(name='노래추천', value='`무작위로 노래를 추천 받을 수 있습니다 [ 미완 ]`', inline=True)
+        embed = discord.Embed(title='Commands', description=' ', color=0xFAFD40)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.add_field(name='`invite`', value='봇 초대링크를 받을 수 있습니다.', inline=True)
         await ctx.send(embed = embed)
-    if arg == 'music':
+    if args == 'music':
         # help music를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Music', description='Tae Bot Music Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-        embed.add_field(name='&join or j', value='`봇을 통화방에 부를 수 있습니다.`', inline=True)
-        embed.add_field(name='&play or p <이름 혹은 url>', value='`봇을 통해 노래를 재생할 수 있습니다.`', inline=True)
-        embed.add_field(name='&queue', value='`봇을 통해 플레이리스트에 등록되있는 노래를 확인할 수 있습니다..`', inline=True)
-        embed.add_field(name='&remove <번호>', value='queue 명령어를 통해 확인할 수 있는 플레이리스트에서 지정한 번호의 노래를 플레에리스트에서 제거할 수 있습니다.`', inline=True)
-        embed.add_field(name='&skip', value='`재생 중인 노래를 건너 뛸 수 있습니다.`', inline=True)
-        embed.add_field(name='&pause', value='`재생 중인 노래를 중단할 수 있습니다.`', inline=True)
-        embed.add_field(name='&resume', value='`중단되있던 노래를 다시 재생할 수 있습니다.`', inline=True)
-        embed.add_field(name='&shuffle', value='`플레이리스트에 있는 노래의 순서를 무작위로 섞을 수 있습니다.`', inline=True)
+        embed = discord.Embed(title='Music', description=' ', color=0xFAFD40)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.add_field(name='`&join`', value='음성채널에 접속합니다', inline=True)
+        embed.add_field(name='`&p <이름 혹은 url>`', value='노래를 재생합니다', inline=True)
+        embed.add_field(name='`&q`', value='플레이리스트를 보여줍니다', inline=True)
+        embed.add_field(name='`&skip`', value='재생 중인 노래를 건너 뛸 수 있습니다', inline=True)
+        embed.add_field(name='`&pause`', value='재생 중인 노래를 일시정지 시킵니다', inline=True)
+        embed.add_field(name='`&resume`', value='일시정지시켰던 노래를 다시 재생할 수 있습니다', inline=True)
+        embed.add_field(name='`&np`', value='재생중인 음악의 정보를 알려줍니다', inline=True)
         await ctx.send(embed = embed)
-    if arg == 'misc':
+    if args == 'misc':
         # help misc를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Misc', description='Tae Bot Misc Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-        embed.add_field(name='&초대', value='`Tae봇을 초대 할 수 있는 링크를 받을 수 있습니다`', inline=True)
-        embed.add_field(name='&avatar', value='`&avatar @유저 혹은 &av @유저 를 통해 프로필 이미지를 얻을 수 있습니다.`', inline=True)
-        embed.add_field(name='&userinfo or 내정보', value='`내 디스코드 계정 or 멘션한 상대에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역활 등)`', inline=True)
+        embed = discord.Embed(title='Misc', description=' ', color=0xFAFD40)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
+        embed.add_field(name='`&userinfo or 내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
         await ctx.send(embed = embed)
-    if arg == 'moderator':
+    if args == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Moderator', description='Tae Bot Moderator Commands', color=0xFAFD40)
-        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-        embed.add_field(name='&공지', value='`&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있습니다. <공지채널 명령어를 통한 채널 설정 필요> \n\n필요한 권한 : 어드민 권한`', inline=True)
-        embed.add_field(name='&공지채널', value='`&공지채널 #채널 을 통해 공지를 보낼 채널을 설정할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
-        embed.add_field(name='&청소', value='`&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있습니다. \n\n필요한 권한 : 메세지 관리`', inline=True)
-        embed.add_field(name='&입장', value='`&입장 #채널 을 통해 입장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
-        embed.add_field(name='&퇴장', value='`&퇴장 #채널 을 통해 퇴장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : 어드민 권한`', inline=True)
-        embed.add_field(name='&changeprefix', value='`&changeprefix <봇을 사용할 칭호> 를 통해 서버에서 Tae봇을 사용할 때 쓸 칭호를 설정할 수 있습니다. 기본 : & \n\n필요한 권한 : 어드민 권한`', inline=True)
-        embed.add_field(name='&slowmode', value='`&slowmode <초> 를 통해 해당 채널에 슬로우모드를 걸 수 있습니다. \n\n필요한 권한 : 채널 관리`', inline=True)
+        embed = discord.Embed(title='Moderator', description=' ', color=0xFAFD40)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.add_field(name='`&공지`', value='&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있습니다. <공지채널 명령어를 통한 채널 설정 필요> \n\n필요한 권한 : Administrator', inline=True)
+        embed.add_field(name='`&공지채널`', value='&공지채널 #채널 을 통해 공지를 보낼 채널을 설정할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
+        embed.add_field(name='`&청소`', value='&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있습니다. \n\n필요한 권한 : Manage Messages', inline=True)
+        embed.add_field(name='`&입장`', value='&입장 #채널 을 통해 입장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
+        embed.add_field(name='`&퇴장`', value='&퇴장 #채널 을 통해 퇴장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
+        embed.add_field(name='`&changeprefix`', value='&changeprefix <봇을 사용할 칭호> 를 통해 서버에서 Tae봇을 사용할 때 쓸 칭호를 설정할 수 있습니다. 기본 : & \n\n필요한 권한 : Administrator', inline=True)
+        embed.add_field(name='`&slowmode`', value='&slowmode <초> 를 통해 해당 채널에 슬로우모드를 걸 수 있습니다. \n\n필요한 권한 : Manage Channels', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
@@ -292,23 +306,6 @@ async def slowmode(ctx, time:int):
         pass
 
 @bot.command()
-# 랜덤 노래추천
-async def 노래추천(ctx):
-    try:
-        dm_channel = await ctx.message.author.create_dm()
-        embed = discord.Embed(title='[ENG] [고등래퍼4/최종회] 김우림 - Do My Best (Feat. 제시) @ 파이널 | Mnet 210423 방송', url='https://www.youtube.com/watch?v=kc7t4s78Hok', description='', color=0xFAFD40)
-        embed.set_author(name='Mnet Official', icon_url='https://yt3.ggpht.com/ytc/AAUvwngh2Ctucs27ygguTKMB21kuat1zOoyvL41UFBtDxQ=s48-c-k-c0x00ffffff-no-rj')
-        embed.set_thumbnail(url='https://musicmeta-phinf.pstatic.net/album/005/691/5691474.jpg?type=r120Fll&v=20210427090509')
-        embed.set_image(url='https://i.ytimg.com/vi/kc7t4s78Hok/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBRIS1jpMSzFyyNbH3mkGVycsbzjw')
-        embed.set_footer(text='Made By Summer#5555', icon_url='https://cdn.discordapp.com/avatars/298333126143377419/a_852afb2e553c453107bb43093d7c9b55.gif?size=128')
-        await dm_channel.send(f'{ctx.message.author.mention}님, 오늘의 추천 노래입니다!')
-        await dm_channel.send(embed = embed)
-        await ctx.send(f'{ctx.message.author.mention} 성공적으로 DM을 전송했습니다!')
-    except:
-        await ctx.send(f'{ctx.message.author.mention} DM을 전송하는데 실패했습니다. 디스코드 설정에서 `개인정보 보호 및 보안`에 들어가서 `서버 멤버가 보내는 개인 메세지 허용하기`를 켜주신 후에 다시 시도해주세요!')
-        return
-
-@bot.command()
 @commands.has_permissions(administrator=True)
 # 공지사항 embed 전송 명령어
 async def 공지(ctx, *, arg):
@@ -335,6 +332,20 @@ async def 공지(ctx, *, arg):
         await dm_channel.send(embed = embed2)
         await asyncio.sleep(5)
         await msg.delete()
+
+@bot.command()
+@commands.is_owner()
+# 봇 전체공지 명령어
+async def 전체공지(ctx, guild: bot.guilds, *, args=None):
+    await ctx.channel.purge(limit=1)
+    channel = discord.utils.get(guild.text_channels, topic='봇-공지')
+    topchannel = discord.utils.get(guild.text_channels, position=0)
+    embed = discord.Embed(title='TaeBot 공지', description=' ', color=0xFAFD40)
+    embed.add_field(name=f'{args}', value=':link:[TaeBot 초대하기](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=45444182&scope=bot)')
+    embed.set_footer(text=f'Sender: {ctx.message.author} - Verified\n다른 채널에 공지를 전송받고 싶다면 채널 주제에 \'봇-공지\'라고 적어주세요.', icon_url=ctx.message.author.avatar_url)
+    await channel.send(embed = embed)
+    if channel is None:
+        await topchannel.send(embed = embed)
 
 @bot.command()
 @commands.has_permissions(kick_members=True)
@@ -419,46 +430,86 @@ async def userinfo(ctx, *, user: discord.Member = None):
     members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
     if user is None:
         user = ctx.author
-        date_format = "%a, %d %b %Y %I:%M %p"
+        date_format = '%Y/%m/%d %I:%M:%S'
+        status = user.status
+        if status == discord.Status.online:
+            status = 'Online | 온라인'
+        elif status == discord.Status.idle:
+            status = 'Idle | 자리 비움'
+        elif status == discord.Status.dnd:
+            status = 'Do Not Disturb | 다른 용무중'
+        elif status == discord.Status.offline:
+            status = 'Offline | 오프라인'
+        
+        activ = user.activities
+        if activ == ():
+            return
+        elif len(activ) == 0:
+            activ = f'**{user.activity}** 하는 중'
+        elif len(activ) == discord.CustomActivity:
+            activ == f'**{user.activity}**\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`'
+        elif len(activ) == 2:
+            activ = f'**{discord.Spotify.title}** 듣는 중\nㄴArtist: {discord.Spotify.artist}\nㄴ Album: {discord.Spotify.album}\nㄴ Duration: {discord.Spotify.duration}'
+        print(activ)
+
         embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
         embed.set_author(name=str(user), icon_url=user.avatar_url)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name='현재 상태', value=f'{user.status}')
+        embed.add_field(name='현재 상태', value=status)
         embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
         embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
+        embed.add_field(name='현재 활동', value='{}'.format(activ), inline=False)
         embed.add_field(name='Discord Badge', value=f'Empty Now')
-        
+
         if len(user.roles) > 1:
             role_string = ' '.join([r.mention for r in user.roles][1:])
             embed.add_field(name='소유중인 역할', value=role_string, inline=False)
         embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
         return await ctx.send(embed=embed)
-    else:
-        date_format = "%a, %d %b %Y %I:%M %p"
-        embed2 = discord.Embed(color=0xdfa3ff, title='USER INFO')
-        embed2.set_author(name=str(user), icon_url=user.avatar_url)
-        embed2.set_thumbnail(url=user.avatar_url)
-        embed2.add_field(name='현재 상태', value=f'{user.status}')
-        embed2.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-        embed2.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed2.add_field(name='현재 활동', value=f'{(user.activity)}\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`', inline=False)
-        embed2.add_field(name='Discord Badge', value=f'Empty Now')
         
+    else:
+        date_format = '%Y/%m/%d %I:%M:%S'
+        status = user.status
+        if status == discord.Status.online:
+            status = 'Online | 온라인'
+        elif status == discord.Status.idle:
+            status = 'Idle | 자리 비움'
+        elif status == discord.Status.dnd:
+            status = 'Do Not Disturb | 다른 용무중'
+        elif status == discord.Status.offline:
+            status = 'Offline | 오프라인'
+
+        activ = user.activities
+        if activ == None:
+            pass
+        elif activ == ActivityType.playing:
+            activ = f'**{user.activity}** 하는 중'
+        elif activ == discord.Activity:
+            activ == f'**{user.activity}**\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`'
+        elif activ == discord.CustomActivity:
+            activ = f'**{user.activity}**'
+        elif activ == activity.Spotify:
+            activ = f'{discord.Spotify.artist} - **{discord.Spotify.title}**\nL Album: {discord.Spotify.album}\nL Duration: {discord.Spotify.duration}'
+
+        embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+        embed.set_author(name=str(user), icon_url=user.avatar_url)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name='현재 상태', value=status)
+        embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+        embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+        embed.add_field(name='현재 활동', value=len(activ), inline=False)
+        embed.add_field(name='Discord Badge', value=f'Empty Now')
+
         if len(user.roles) > 1:
             role_string = ' '.join([r.mention for r in user.roles][1:])
-            embed2.add_field(name='소유중인 역할', value=role_string, inline=False)
-        embed2.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
-        return await ctx.send(embed=embed2)
+            embed.add_field(name='소유중인 역할', value=role_string, inline=False)
+        embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
+        return await ctx.send(embed = embed)
 
 @bot.command()
-async def 초대(ctx):
-    await ctx.send('이 명령어는 개발이 완료된 후 사용할 수 있습니다.')
-
-@bot.event
-async def on_member_remove(member):
-    # 서버에서 멤버가 나갔을 때 실행 될 이벤트
-    await bot.get_channel().send(f'{member.mention}님이 서버에서 나가셨어요.')
+async def invite(ctx):
+    embed = discord.Embed(title='TaeBot Invite Link', description='[Invite Link](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=45444182&scope=bot)', color=0xFAFD40)
+    await ctx.send(embed = embed)
 
 @청소.error
 async def purge_error(ctx, error):
@@ -496,6 +547,12 @@ async def send_error(ctx, error):
         await asyncio.sleep(5)
         await error_msg2.delete()
 
+@전체공지.error
+async def send_error(ctx, error):
+    # 명령어 실행자가 봇의 오너가 아닐 경우
+    if isinstance(error, NotOwner):
+        await ctx.send('{}, 개발자만 사용할 수 있는 명령어입니다!'.format(ctx.message.author.mention))
+        return
 
 @옌.error
 async def send_error(ctx,error):
