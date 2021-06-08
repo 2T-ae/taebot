@@ -45,6 +45,9 @@ intents.members = True
 bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 bot.remove_command('help')
 owner = 298333126143377419
+now_utc = datetime.datetime.now(timezone('UTC'))
+now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+time = now_kst
 
 @bot.event
 async def on_ready():
@@ -71,6 +74,10 @@ async def status_task():
 
 @bot.event
 async def on_command_error(ctx: commands.Context, exception: Exception):
+    embed = discord.Embed(title='<a:nope_gif:851841522726338580> 오류가 발생했습니다.', description=' ', color=0xFF0000)
+    embed.add_field(name='**Error Message**', value=f'```Error occured - {type(exception).__name__} : {exception}```', inline=False)
+    embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+    await ctx.send(embed = embed)
     print(f'Error occured - {type(exception).__name__} : {exception}')
 
 @bot.event
@@ -209,10 +216,6 @@ async def on_message(msg):
 
 @bot.command()
 async def help(ctx, *, args=None):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    time = now_kst
-    print(time)
     if args is None:
         embed = discord.Embed(title='TaeBot Help', description=' ', color=0xFAFD40)
         embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
