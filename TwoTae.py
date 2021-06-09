@@ -293,21 +293,18 @@ async def gcreate(ctx, time=None, *, prize=None):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def slowmode(ctx, time=None):
-    time_convert = {'s':1, 'm':60, 'h':3600, 'd':86400}
+async def slowmode(ctx, time):
+    time_convert = {'0':0,'s':1, 'm':60, 'h':3600, 'd':86400}
     time = int(time) * time_convert[time[-1]]
-    try:
-        if time == 0:
-            await ctx.send('Slowmode가 꺼졌습니다.')
-            await ctx.channel.edit(slowmode_delay = 0)
-        elif time > 21600:
-            await ctx.send('Slowmode는 6시간을 초과할 수 없습니다!')
-            return
-        else:
-            await ctx.channel.edit(slowmode_delay = time)
-            await ctx.send(f'Slowmode가 {time}초로 설정되었습니다.')
-    except:
-        pass
+    if time == 0:
+        await ctx.send('Slowmode가 꺼졌습니다.')
+        await ctx.channel.edit(slowmode_delay = 0)
+    elif time > 21600:
+        await ctx.send('Slowmode는 6시간을 초과할 수 없습니다!')
+        return
+    else:
+        await ctx.channel.edit(slowmode_delay = time)
+        await ctx.send(f'Slowmode가 {time}초로 설정되었습니다.')
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -356,10 +353,8 @@ async def 전체공지(ctx, args=None):
 @commands.has_permissions(kick_members=True)
 async def 킥(ctx, member: discord.Member=None, *, reasons=None):
     try:
-        now = datetime.datetime.now()
-        time = f'{str(now.year)}년/{str(now.month)}월/{str(now.day)}일 {str(now.hour)}시{str(now.minute)}분'
         user = await bot.get_user(member.id).create_dm()
-        embed = discord.Embed(title='추방', description=f'Server: {ctx.guild.name}')
+        embed = discord.Embed(title='KICKED', description=f'Server: {ctx.guild.name}')
         embed.add_field(name='사유', value=f'{reasons}')
         embed.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
         await user.send(embed = embed)
@@ -382,8 +377,6 @@ async def 청소(ctx,amount:int):
 @bot.command()
 async def 옌(ctx, *, arg):
     user = await bot.get_user(382891982382563328).create_dm()
-    now = datetime.datetime.now()
-    time = f'{str(now.year)}년|{str(now.month)}월|{str(now.day)}일 {str(now.hour)}시{str(now.minute)}분'
     if arg is None:
             error_msg = await ctx.send('보낼 메세지를 제대로 입력해주세요')
             await asyncio.sleep(5)
@@ -610,13 +603,15 @@ async def send_error(ctx, error):
         msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
         await asyncio.sleep(5)
         await msg.delete()
-    # 인수가 유저를 멘션하지 않았을 경우 출력 될 메세지
+    # 유저를 멘션하지 않았을 경우 출력 될 메세지
     if isinstance(error, BadArgument):
         msg2 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
         await asyncio.sleep(5)
         await msg2.delete()
-    if isinstance(error, CommandInvokeError):
-        msg3 = await ctx.send('명령어를 실행하는데 알 수 없는 문제가 발생했습니다.')
+    
+    # 유저를 멘션하지 않았을 경우 출력 될 메세지
+    if isinstance(error, MissingRequiredArgument):
+        msg3 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
         await asyncio.sleep(5)
         await msg3.delete()
 
@@ -629,10 +624,15 @@ async def send_error(ctx, error):
         await msg.delete()
     # 인수가 숫자가 아닐 경우 출력 될 메세지
     if isinstance(error, BadArgument):
-        msg2 = await ctx.send(f'{ctx.message.author.mention}, 숫자를 입력해주세요! (ex. 1,2,3...)')
+        msg2 = await ctx.send(f'{ctx.message.author.mention}, 시간을 정확히 입력해주세요! (ex. 10s, 10m, 1h)')
         await asyncio.sleep(5)
         await msg2.delete()
-
+    # 인수가 없을 경우 출력 될 메세지
+    if isinstance(error, MissingRequiredArgument):
+        msg3 = await ctx.send(f'{ctx.message.author.mention}, 시간을 정확히 입력해주세요! (ex. 10s, 10m, 1h)')
+        await asyncio.sleep(5)
+        await msg3.delete()
+        
 
 # Music Commands
 # Silence useless bug reports messages
