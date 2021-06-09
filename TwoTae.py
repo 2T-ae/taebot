@@ -318,8 +318,6 @@ async def 공지(ctx, *, arg):
 
         announce = announce_dict[str(ctx.guild.id)] 
 
-        now = datetime.datetime.now()
-        time = f'{str(now.year)}/{str(now.month)}/{str(now.day)}'
         dm_channel = await ctx.message.author.create_dm()
         await ctx.channel.purge(limit=1)
         embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
