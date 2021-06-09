@@ -327,7 +327,7 @@ async def 공지(ctx, *, arg):
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
         embed2.add_field(name=f'`{arg}`' + ' 라는 메세지를 설정한 공지채널에 보냈습니다.', value='** **', inline=False)
-        embed2.set_footer(text=f'{time} at {ctx.guild}')
+        embed2.set_footer(text=f'Today at {time} • {ctx.guild}')
         await dm_channel.send(embed = embed2)
         await asyncio.sleep(5)
         await msg.delete()
@@ -419,7 +419,6 @@ async def _avatar(ctx, member : discord.Member=None):
         embed2.set_image(url=member.avatar_url)
         embed2.set_author(name=f'{member}', icon_url=member.avatar_url)
         await ctx.send(embed = embed2)
-
     
 @bot.command(aliases=['내정보'])
 async def userinfo(ctx, *, user: discord.Member = None):
