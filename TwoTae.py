@@ -104,13 +104,12 @@ async def on_guild_join(guild):
     with open("announce.json", "w", encoding='utf-8') as f:
         json.dump(announce,f)
 
-    if guild.id(850168862959861780):
-        return
-    else:
-        overwrites = {
-        guild.default_role: discord.PermissionOverwrite(read_messages=True),
-        }
-        await guild.create_text_channel('Bot-Announcement', overwrites=overwrites, topic='봇-공지')
+    #서버에 들어갔을 때 전송할 메세지
+    firstchannel = discord.utils.get(guild.text_channels, position=0)
+    embed = discord.Embed(title='당신의 서버에 저를 추가해주셔서 감사합니다!', description=' ')
+    embed.add_field(name='Tae봇의 접두사는 `&`입니다!', value='관리자 권한이 있을 시 changeprefix 명령어를 통해 접두사를 바꿀 수 있습니다.')
+    embed.add_field(name='\n봇의 사용법을 보시려면 `&help` 명령어를 사용해보세요!')
+    await firstchannel.send(embed = embed)
 
 @bot.event
 async def on_member_join(member):
@@ -294,7 +293,9 @@ async def gcreate(ctx, time=None, *, prize=None):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def slowmode(ctx, time:int):
+async def slowmode(ctx, time=None):
+    time_convert = {'s':1, 'm':60, 'h':3600, 'd':86400}
+    time = int(time) * time_convert[time[-1]]
     try:
         if time == 0:
             await ctx.send('Slowmode가 꺼졌습니다.')
@@ -339,16 +340,17 @@ async def 공지(ctx, *, arg):
 @bot.command()
 @commands.is_owner()
 # 봇 전체공지 명령어
-async def 전체공지(ctx, guild: bot.guilds, *, args=None):
-    await ctx.channel.purge(limit=1)
-    channel = discord.utils.get(guild.text_channels, topic='봇-공지')
-    topchannel = discord.utils.get(guild.text_channels, position=0)
-    embed = discord.Embed(title='TaeBot 공지', description=' ', color=0xFAFD40)
-    embed.add_field(name=f'{args}', value=':link:[TaeBot 초대하기](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=45444182&scope=bot)')
-    embed.set_footer(text=f'Sender: {ctx.message.author} - Verified\n다른 채널에 공지를 전송받고 싶다면 채널 주제에 \'봇-공지\'라고 적어주세요.', icon_url=ctx.message.author.avatar_url)
-    await channel.send(embed = embed)
-    if channel is None:
-        await topchannel.send(embed = embed)
+async def 전체공지(ctx, args=None):
+    for i in bot.guilds:
+        channel = discord.utils.get(i.text_channels, topic='봇-공지')
+        topchannel = discord.utils.get(i.text_channels, position=0)
+        embed = discord.Embed(title='TaeBot 공지', description=' ', color=0xFAFD40)
+        embed.add_field(name=f'{args}', value=':link:[TaeBot 초대하기](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=45444182&scope=bot)')
+        embed.set_footer(text=f'Sender: {ctx.message.author} - Verified\n다른 채널에 공지를 전송받고 싶다면 채널 주제에 \'봇-공지\'라고 적어주세요.', icon_url=ctx.message.author.avatar_url)
+        if channel is None:
+            await topchannel.send(embed = embed)
+        else:
+            await channel.send(embed = embed)
 
 @bot.command()
 @commands.has_permissions(kick_members=True)
