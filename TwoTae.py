@@ -322,7 +322,7 @@ async def 공지(ctx, *, arg):
         await ctx.channel.purge(limit=1)
         embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
         embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text='Sender: 'f'{ctx.message.author} | {time}', icon_url=ctx.author.avatar_url)
+        embed.set_footer(text='Sender: 'f'{ctx.message.author} | Today at {time}', icon_url=ctx.author.avatar_url)
         await bot.get_channel(int(announce)).send(embed = embed)
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
