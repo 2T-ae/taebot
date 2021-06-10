@@ -247,6 +247,7 @@ async def help(ctx, *, args=None):
         embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
         embed.add_field(name='`&userinfo or 내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
+        embed.add_field(name='`&gcreate`', value='&gcreate <시간> <상품> 으로 Giveaway를 만듭니다. (ex. 5s, 5m, 5h, 5d)', inline=True)
         await ctx.send(embed = embed)
     if args == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
@@ -259,15 +260,16 @@ async def help(ctx, *, args=None):
         embed.add_field(name='`&퇴장`', value='&퇴장 #채널 을 통해 퇴장로그를 보낼 채널을 설정 할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&changeprefix`', value='&changeprefix <봇을 사용할 칭호> 를 통해 서버에서 Tae봇을 사용할 때 쓸 칭호를 설정할 수 있습니다. 기본 : & \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&slowmode`', value='&slowmode <초> 를 통해 해당 채널에 슬로우모드를 걸 수 있습니다. \n\n필요한 권한 : Manage Channels', inline=True)
+        embed.add_field(name='`&nuke`', value='해당 명령어를 사용한 채널을 복제 후 삭제시킵니다. \n\n필요한 권한 : Administrator', inline=True)
         await ctx.send(embed = embed)
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def gcreate(ctx, time=None, *, prize=None):
     if time == None:
-        return await ctx.send('Please include a time!')
+        return await ctx.send('시간을 올바르게 입력해주세요!')
     elif prize == None:
-        return await ctx.send('Please include a prize!')
+        return await ctx.send('상품을 올바르게 입력해주세요!')
     embed = discord.Embed(title='New Giveaway!', description=f'{ctx.author.mention} is giving away **{prize}**!')
     time_convert = {'s':1, 'm':60, 'h':3600, 'd':86400}
     gawtime = int(time[0]) * time_convert[time[-1]]
@@ -280,15 +282,14 @@ async def gcreate(ctx, time=None, *, prize=None):
 
     new_gaw_msg = await ctx.channel.fetch_message(gaw_msg.id)
 
-    users = await new_gaw_msg.reactions[1].users().flatten()
+    users = await new_gaw_msg.reactions[0].users().flatten()
     users.pop(users.index(bot.user))
 
     winner = random.choice(users)
 
     embed2 = discord.Embed(title='Giveaway', description=' ', color=0xFAFD40)
-    embed.add_field(name=f'🎁 **{prize}**', value='Host:')
-    embed.add_field(name=f':🏅 **Winner**:', value=f'{winner.mention}')
-
+    embed2.add_field(name=f'🎁 **{prize}**', value=f'Host: {ctx.message.author}')
+    embed2.add_field(name=f':🏅 **Winner**:', value=f'{winner.mention}')
     await ctx.send(embed = embed2)
 
 @bot.command()
@@ -362,7 +363,31 @@ async def 킥(ctx, member: discord.Member=None, *, reasons=None):
         embed2.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
         await ctx.send(embed = embed2)
     except CommandError:
-        return      
+        return
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def nuke(ctx):
+    await ctx.send('`Nuclear Launch Detected.` 5초 뒤 채널을 터칩니다')
+    await asyncio.sleep(1)
+    count = await ctx.send('5')
+    await asyncio.sleep(1)
+    await count.edit(content='4')
+    await asyncio.sleep(1)
+    await count.edit(content='3')
+    await asyncio.sleep(1)
+    await count.edit(content='2')
+    await asyncio.sleep(1)
+    await count.edit(content='1')
+    await asyncio.sleep(1)
+    await count.edit(content='Execute.')
+    await asyncio.sleep(1)
+    channel = ctx.channel
+    posit = channel.position
+    new_channel = await channel.clone()
+    await new_channel.edit(position=posit, sync_permissions=True)
+    await channel.delete()
+    await new_channel.send(f'Success. [{ctx.message.author.mention}]')
 
 @bot.command()
 @commands.has_permissions(manage_messages=True)
@@ -605,7 +630,6 @@ async def send_error(ctx, error):
         msg2 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
         await asyncio.sleep(5)
         await msg2.delete()
-    
     # 유저를 멘션하지 않았을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
         msg3 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
@@ -629,6 +653,14 @@ async def send_error(ctx, error):
         msg3 = await ctx.send(f'{ctx.message.author.mention}, 시간을 정확히 입력해주세요! (ex. 10s, 10m, 1h)')
         await asyncio.sleep(5)
         await msg3.delete()
+
+@nuke.error
+async def send_error(ctx, error):
+    # administrator 권한이 없을 경우 출력 될 메세지
+    if isinstance(error, MissingPermissions):
+        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
+        await asyncio.sleep(5)
+        await msg.delete()
         
 
 # Music Commands
