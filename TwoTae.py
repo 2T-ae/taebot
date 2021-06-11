@@ -47,7 +47,7 @@ bot.remove_command('help')
 owner = 298333126143377419
 now_utc = datetime.datetime.now(timezone('UTC'))
 now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-time = now_kst
+ktime = now_kst
 
 @bot.event
 async def on_ready():
@@ -76,7 +76,7 @@ async def status_task():
 async def on_command_error(ctx: commands.Context, exception: Exception):
     embed = discord.Embed(title='<a:nope_gif:851841522726338580> 오류가 발생했습니다.', description=' ', color=0xFF0000)
     embed.add_field(name='**Error Message**', value=f'```Error occured - {type(exception).__name__} : {exception}```', inline=False)
-    embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+    embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
     await ctx.send(embed = embed)
     print(f'Error occured - {type(exception).__name__} : {exception}')
 
@@ -217,7 +217,7 @@ async def on_message(msg):
 async def help(ctx, *, args=None):
     if args is None:
         embed = discord.Embed(title='TaeBot Help', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='Commands', value='`&help commands`', inline=True)
         embed.add_field(name='Music', value='`&help music`', inline=True)
         embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
@@ -226,13 +226,13 @@ async def help(ctx, *, args=None):
     if args == 'commands':
         # help commands를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Commands', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`invite`', value='봇 초대링크를 받을 수 있습니다.', inline=True)
         await ctx.send(embed = embed)
     if args == 'music':
         # help music를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Music', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&join`', value='음성채널에 접속합니다', inline=True)
         embed.add_field(name='`&p <이름 혹은 url>`', value='노래를 재생합니다', inline=True)
         embed.add_field(name='`&q`', value='플레이리스트를 보여줍니다', inline=True)
@@ -244,7 +244,7 @@ async def help(ctx, *, args=None):
     if args == 'misc':
         # help misc를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Misc', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
         embed.add_field(name='`&userinfo or 내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
         embed.add_field(name='`&gcreate`', value='&gcreate <시간> <상품> 으로 Giveaway를 만듭니다. (ex. 5s, 5m, 5h, 5d)', inline=True)
@@ -252,7 +252,7 @@ async def help(ctx, *, args=None):
     if args == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Moderator', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {time}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&공지`', value='&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있습니다. <공지채널 명령어를 통한 채널 설정 필요> \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&공지채널`', value='&공지채널 #채널 을 통해 공지를 보낼 채널을 설정할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&청소`', value='&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있습니다. \n\n필요한 권한 : Manage Messages', inline=True)
@@ -287,10 +287,7 @@ async def gcreate(ctx, time=None, *, prize=None):
 
     winner = random.choice(users)
 
-    embed2 = discord.Embed(title='Giveaway', description=' ', color=0xFAFD40)
-    embed2.add_field(name=f'🎁 **{prize}**', value=f'Host: {ctx.message.author}')
-    embed2.add_field(name=f':🏅 **Winner**:', value=f'{winner.mention}')
-    await ctx.send(embed = embed2)
+    await ctx.send(f'Congratulations {winner.mention}! You won the **{prize}**')
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
@@ -323,12 +320,12 @@ async def 공지(ctx, *, arg):
         await ctx.channel.purge(limit=1)
         embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
         embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text='Sender: 'f'{ctx.message.author} | Today at {time}', icon_url=ctx.author.avatar_url)
+        embed.set_footer(text='Sender: 'f'{ctx.message.author} | Today at {ktime}', icon_url=ctx.author.avatar_url)
         await bot.get_channel(int(announce)).send(embed = embed)
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
         embed2.add_field(name=f'`{arg}`' + ' 라는 메세지를 설정한 공지채널에 보냈습니다.', value='** **', inline=False)
-        embed2.set_footer(text=f'Today at {time} • {ctx.guild}')
+        embed2.set_footer(text=f'Today at {ktime} • {ctx.guild}')
         await dm_channel.send(embed = embed2)
         await asyncio.sleep(5)
         await msg.delete()
@@ -355,12 +352,12 @@ async def 킥(ctx, member: discord.Member=None, *, reasons=None):
         user = await bot.get_user(member.id).create_dm()
         embed = discord.Embed(title='KICKED', description=f'Server: {ctx.guild.name}')
         embed.add_field(name='사유', value=f'{reasons}')
-        embed.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
+        embed.set_footer(text=f'처리자: {ctx.message.author} • at {ktime}', icon_url=ctx.author.avatar_url)
         await user.send(embed = embed)
         await member.kick(reason=reasons)
         embed2 = discord.Embed(title='Result', description='처리 기록')
         embed2.add_field(name=f'{member}가 추방되었습니다.', value=f'사유 : {reasons}')
-        embed2.set_footer(text=f'처리자: {ctx.message.author} • at {time}', icon_url=ctx.author.avatar_url)
+        embed2.set_footer(text=f'처리자: {ctx.message.author} • at {ktime}', icon_url=ctx.author.avatar_url)
         await ctx.send(embed = embed2)
     except CommandError:
         return
@@ -412,7 +409,7 @@ async def 옌(ctx, *, arg):
         await asyncio.sleep(5)
         await msg.delete()
         embed2 = discord.Embed(title='발송한 메세지 기록', description=' ', color=0xFAFD40)
-        embed2.add_field(name=(arg), value=f'{time}에 발송한 메세지입니다.')
+        embed2.add_field(name=(arg), value=f'{ktime}에 발송한 메세지입니다.')
         await dm.send(embed = embed2)
         # 전송될 메세지 Embed
         dm_for_user = await user.send(f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 5초 뒤에 표시됩니다.')
@@ -1138,8 +1135,6 @@ class Music(commands.Cog):
         if ctx.voice_client:
             if ctx.voice_client.channel != ctx.author.voice.channel:
                 raise commands.CommandError('Bot is already in a voice channel.')
-
-bot.add_cog(Music(bot))
 
 access_token = os.environ["BOT_TOKEN"]
 
