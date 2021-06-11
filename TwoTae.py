@@ -458,16 +458,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
         elif status == discord.Status.offline:
             status = 'Offline | 오프라인'
         
-        activ = user.activities
-        if activ == ():
-            return
-        elif len(activ) == 0:
-            activ = f'**{user.activity}** 하는 중'
-        elif len(activ) == discord.CustomActivity:
-            activ == f'**{user.activity}**\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`'
-        elif len(activ) == 2:
-            activ = f'**{discord.Spotify.title}** 듣는 중\nㄴArtist: {discord.Spotify.artist}\nㄴ Album: {discord.Spotify.album}\nㄴ Duration: {discord.Spotify.duration}'
-        print(activ)
+        activ = user.activities[0].name
 
         embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
         embed.set_author(name=str(user), icon_url=user.avatar_url)
@@ -475,7 +466,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
         embed.add_field(name='현재 상태', value=status)
         embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
         embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed.add_field(name='현재 활동', value='{}'.format(activ), inline=False)
+        embed.add_field(name='현재 활동', value=f'**{activ}** 하는 중', inline=False)
         embed.add_field(name='Discord Badge', value=f'Empty Now')
 
         if len(user.roles) > 1:
@@ -496,17 +487,9 @@ async def userinfo(ctx, *, user: discord.Member = None):
         elif status == discord.Status.offline:
             status = 'Offline | 오프라인'
 
-        activ = user.activities
-        if activ == None:
-            pass
-        elif activ == ActivityType.playing:
-            activ = f'**{user.activity}** 하는 중'
-        elif activ == discord.Activity:
-            activ == f'**{user.activity}**\n\n**{user.activities[1].name}** 하는 중\nL {user.activities[1].details}\nL {user.activities[1].state}\n**`{user.activities[1].large_image_text}`** | `{user.activities[1].small_image_text}`'
-        elif activ == discord.CustomActivity:
-            activ = f'**{user.activity}**'
-        elif activ == activity.Spotify:
-            activ = f'{discord.Spotify.artist} - **{discord.Spotify.title}**\nL Album: {discord.Spotify.album}\nL Duration: {discord.Spotify.duration}'
+        activ = user.activities[0].name
+
+        profile = user.profile
 
         embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
         embed.set_author(name=str(user), icon_url=user.avatar_url)
@@ -514,7 +497,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
         embed.add_field(name='현재 상태', value=status)
         embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
         embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed.add_field(name='현재 활동', value=len(activ), inline=False)
+        embed.add_field(name='현재 활동', value=f'**{activ}** 하는 중', inline=False)
         embed.add_field(name='Discord Badge', value=f'Empty Now')
 
         if len(user.roles) > 1:
@@ -952,7 +935,6 @@ class Music(commands.Cog):
         ctx.voice_state.voice = await destination.connect()
 
     @commands.command(name='leave', aliases=['disconnect', 'l'])
-    @commands.has_permissions(manage_guild=True)
     async def _leave(self, ctx: commands.Context):
         """Clears the queue and leaves the voice channel."""
 
@@ -1135,6 +1117,8 @@ class Music(commands.Cog):
         if ctx.voice_client:
             if ctx.voice_client.channel != ctx.author.voice.channel:
                 raise commands.CommandError('Bot is already in a voice channel.')
+
+bot.add_cog(Music(bot))
 
 access_token = os.environ["BOT_TOKEN"]
 
