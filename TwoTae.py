@@ -283,7 +283,8 @@ async def gcreate(ctx, time=None, *, prize=None):
     new_gaw_msg = await ctx.channel.fetch_message(gaw_msg.id)
 
     users = await new_gaw_msg.reactions[0].users().flatten()
-    users.pop(users.index(bot.user))
+    print(users)
+    users.pop(users.index(bot))
 
     winner = random.choice(users)
 
