@@ -459,16 +459,52 @@ async def userinfo(ctx, *, user: discord.Member = None):
         elif status == discord.Status.offline:
             status = 'Offline | 오프라인'
         
-        activ = user.activities[0].name
-
-        embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-        embed.set_author(name=str(user), icon_url=user.avatar_url)
-        embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name='현재 상태', value=status)
-        embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-        embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed.add_field(name='현재 활동', value=f'**{activ}** 하는 중', inline=False)
-        embed.add_field(name='Discord Badge', value=f'Empty Now')
+        activ = user.activities
+        if activ == ():
+            embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+            embed.set_author(name=str(user), icon_url=user.avatar_url)
+            embed.set_thumbnail(url=user.avatar_url)
+            embed.add_field(name='현재 상태', value=status)
+            embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+            embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+            embed.add_field(name='Discord Badge', value=f'Empty Now')
+        elif len(user.activities) == 2:
+            if activ[1].details is None:
+                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+                embed.set_author(name=str(user), icon_url=user.avatar_url)
+                embed.set_thumbnail(url=user.avatar_url)
+                embed.add_field(name='현재 상태', value=status)
+                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중')
+            else:                
+                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+                embed.set_author(name=str(user), icon_url=user.avatar_url)
+                embed.set_thumbnail(url=user.avatar_url)
+                embed.add_field(name='현재 상태', value=status)
+                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`', inline=False)
+                embed.add_field(name='Discord Badge', value=f'Empty Now')
+        elif len(user.activities) == 1:
+            if str(user.activities[0].type) == "ActivityType.playing":
+                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+                embed.set_author(name=str(user), icon_url=user.avatar_url)
+                embed.set_thumbnail(url=user.avatar_url)
+                embed.add_field(name='현재 상태', value=status)
+                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)
+                embed.add_field(name='Discord Badge', value=f'Empty Now')
+            elif str(user.activities[0].type) == "ActivityType.custom":
+                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+                embed.set_author(name=str(user), icon_url=user.avatar_url)
+                embed.set_thumbnail(url=user.avatar_url)
+                embed.add_field(name='현재 상태', value=status)
+                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{activ}**', inline=False)
+                embed.add_field(name='Discord Badge', value=f'Empty Now')
 
         if len(user.roles) > 1:
             role_string = ' '.join([r.mention for r in user.roles][1:])
@@ -489,8 +525,6 @@ async def userinfo(ctx, *, user: discord.Member = None):
             status = 'Offline | 오프라인'
 
         activ = user.activities[0].name
-
-        profile = user.profile
 
         embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
         embed.set_author(name=str(user), icon_url=user.avatar_url)
