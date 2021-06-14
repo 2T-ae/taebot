@@ -292,18 +292,16 @@ async def gcreate(ctx, time=None, *, prize=None):
 
 @bot.command()
 @commands.has_permissions(manage_channels=True)
-async def slowmode(ctx, time):
-    time_convert = {'0':0,'s':1, 'm':60, 'h':3600, 'd':86400}
-    time = int(time) * time_convert[time[-1]]
+async def 슬로우(ctx, time):
+    time = int(time)
     if time == 0:
-        await ctx.send('Slowmode가 꺼졌습니다.')
+        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}`초로 설정되었습니다.')
         await ctx.channel.edit(slowmode_delay = 0)
     elif time > 21600:
-        await ctx.send('Slowmode는 6시간을 초과할 수 없습니다!')
-        return
+        await ctx.send(f'{ctx.author.mention}, 초는`0(끄기) ~ 21600(6시간)`으로 입력해주세요.')
     else:
         await ctx.channel.edit(slowmode_delay = time)
-        await ctx.send(f'Slowmode가 {time}초로 설정되었습니다.')
+        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}`초로 설정되었습니다.')
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -458,60 +456,40 @@ async def userinfo(ctx, *, user: discord.Member = None):
             status = 'Do Not Disturb | 다른 용무중'
         elif status == discord.Status.offline:
             status = 'Offline | 오프라인'
+
+        info = embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+        embed.set_author(name=str(user), icon_url=user.avatar_url)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name='현재 상태', value=status, inline=False)
+        embed.add_field(name='Discord Badge', value=f'Empty Now', inline=False)
+        embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
+        embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
+        embed.add_field(name='Bot', value=user.bot, inline=False)
         
         activ = user.activities
         if activ == ():
-            embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-            embed.set_author(name=str(user), icon_url=user.avatar_url)
-            embed.set_thumbnail(url=user.avatar_url)
-            embed.add_field(name='현재 상태', value=status)
-            embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-            embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-            embed.add_field(name='Discord Badge', value=f'Empty Now')
+            pass
         elif len(user.activities) == 2:
             if activ[1].details is None:
-                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-                embed.set_author(name=str(user), icon_url=user.avatar_url)
-                embed.set_thumbnail(url=user.avatar_url)
-                embed.add_field(name='현재 상태', value=status)
-                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
                 embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중')
             else:                
-                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-                embed.set_author(name=str(user), icon_url=user.avatar_url)
-                embed.set_thumbnail(url=user.avatar_url)
-                embed.add_field(name='현재 상태', value=status)
-                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
                 embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`', inline=False)
-                embed.add_field(name='Discord Badge', value=f'Empty Now')
         elif len(user.activities) == 1:
             if str(user.activities[0].type) == "ActivityType.playing":
-                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-                embed.set_author(name=str(user), icon_url=user.avatar_url)
-                embed.set_thumbnail(url=user.avatar_url)
-                embed.add_field(name='현재 상태', value=status)
-                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
                 embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)
-                embed.add_field(name='Discord Badge', value=f'Empty Now')
             elif str(user.activities[0].type) == "ActivityType.custom":
-                embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
-                embed.set_author(name=str(user), icon_url=user.avatar_url)
-                embed.set_thumbnail(url=user.avatar_url)
-                embed.add_field(name='현재 상태', value=status)
-                embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
-                embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-                embed.add_field(name='현재 활동', value=f'Custom Status\n**{activ}**', inline=False)
-                embed.add_field(name='Discord Badge', value=f'Empty Now')
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+
+        if len(user.roles) > 1:
+            info.add_field(name='Highest Role', value=user.top_role.mention, inline=False)
 
         if len(user.roles) > 1:
             role_string = ' '.join([r.mention for r in user.roles][1:])
-            embed.add_field(name='소유중인 역할', value=role_string, inline=False)
-        embed.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
+            print(role_string)
+            info.add_field(name='Roles', value=role_string, inline=False)
+        info.set_footer(text=f'#{members.index(user) + 1} • USER ID : ' + str(user.id))
         return await ctx.send(embed=embed)
-        
+
     else:
         date_format = '%Y/%m/%d %I:%M:%S'
         status = user.status
@@ -524,16 +502,28 @@ async def userinfo(ctx, *, user: discord.Member = None):
         elif status == discord.Status.offline:
             status = 'Offline | 오프라인'
 
-        activ = user.activities[0].name
-
-        embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
+        info = embed = discord.Embed(color=0xdfa3ff, title='USER INFO')
         embed.set_author(name=str(user), icon_url=user.avatar_url)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name='현재 상태', value=status)
+        embed.add_field(name='현재 상태', value=status, inline=False)
+        embed.add_field(name='Discord Badge', value=f'Empty Now', inline=False)
         embed.add_field(name='계정 생성일', value=user.created_at.strftime(date_format), inline=False)
         embed.add_field(name='서버 접속일', value=user.joined_at.strftime(date_format), inline=False)
-        embed.add_field(name='현재 활동', value=f'**{activ}** 하는 중', inline=False)
-        embed.add_field(name='Discord Badge', value=f'Empty Now')
+        embed.add_field(name='Bot', value=user.bot, inline=False)
+        
+        activ = user.activities
+        if activ == ():
+            return
+        elif len(user.activities) == 2:
+            if activ[1].details is None:
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중')
+            else:                
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`', inline=False)
+        elif len(user.activities) == 1:
+            if str(user.activities[0].type) == "ActivityType.playing":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)
+            elif str(user.activities[0].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
 
         if len(user.roles) > 1:
             role_string = ' '.join([r.mention for r in user.roles][1:])
@@ -651,7 +641,7 @@ async def send_error(ctx, error):
         await asyncio.sleep(5)
         await msg3.delete()
 
-@slowmode.error
+@슬로우.error
 async def send_error(ctx, error):
     # manage_channels 권한이 없을 경우 출력 될 메세지
     if isinstance(error, MissingPermissions):
@@ -660,12 +650,12 @@ async def send_error(ctx, error):
         await msg.delete()
     # 인수가 숫자가 아닐 경우 출력 될 메세지
     if isinstance(error, BadArgument):
-        msg2 = await ctx.send(f'{ctx.message.author.mention}, 시간을 정확히 입력해주세요! (ex. 10s, 10m, 1h)')
+        msg2 = await ctx.send(f'{ctx.author.mention}, 초는`0(끄기) ~ 21600(6시간)`으로 입력해주세요.')
         await asyncio.sleep(5)
         await msg2.delete()
     # 인수가 없을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
-        msg3 = await ctx.send(f'{ctx.message.author.mention}, 시간을 정확히 입력해주세요! (ex. 10s, 10m, 1h)')
+        msg3 = await ctx.send(f'{ctx.author.mention}, 초는`0(끄기) ~ 21600(6시간)`으로 입력해주세요.')
         await asyncio.sleep(5)
         await msg3.delete()
 
