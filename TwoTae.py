@@ -26,7 +26,7 @@ from discord import client
 from discord.colour import Color
 from discord.embeds import Embed
 from discord.ext import commands, tasks
-from discord.ext.commands.core import has_permissions
+from discord.ext.commands.core import Command, has_permissions
 from discord.flags import alias_flag_value
 from discord.user import User
 from discord.utils import get
@@ -45,9 +45,6 @@ intents.members = True
 bot = commands.Bot(command_prefix = get_prefix, intents = intents)
 bot.remove_command('help')
 owner = 298333126143377419
-now_utc = datetime.datetime.now(timezone('UTC'))
-now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-ktime = now_kst
 
 @bot.event
 async def on_ready():
@@ -62,23 +59,29 @@ async def on_ready():
 async def status_task():
    while True:
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="&help를 입력해보세요!"))
-        await asyncio.sleep(30)
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name=f"Support to Summer#5555"))
-        await asyncio.sleep(30)
+        await asyncio.sleep(12)
         await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}개의 서버와 함께해요!".format(len(bot.guilds))))
-        await asyncio.sleep(30)
-        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}명의 유저와 함께해요!".format(len(bot.users))))
-        await asyncio.sleep(30)
+        await asyncio.sleep(12)
         await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.listening, name="&play"))
-        await asyncio.sleep(30)
+        await asyncio.sleep(12)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="{}명의 유저와 함께해요!".format(len(bot.users))))
+        await asyncio.sleep(12)
+        await bot.change_presence(status=discord.Status.online, activity=discord.Game(name='Tae 0.1V'))
+        await asyncio.sleep(12)
 
 @bot.event
 async def on_command_error(ctx: commands.Context, exception: Exception):
-    embed = discord.Embed(title='<a:nope_gif:851841522726338580> 오류가 발생했습니다.', description=' ', color=0xFF0000)
-    embed.add_field(name='**Error Message**', value=f'```Error occured - {type(exception).__name__} : {exception}```', inline=False)
-    embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
-    await ctx.send(embed = embed)
-    print(f'Error occured - {type(exception).__name__} : {exception}')
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    ktime = now_kst
+    try:
+        embed = discord.Embed(title='<a:nope_gif:851841522726338580> 오류가 발생했습니다.', description=' ', color=0xFF0000)
+        embed.add_field(name='**Error Message**', value=f'```Command raised an exception: {type(exception).__name__} : {exception}```', inline=False)
+        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        await ctx.send(embed = embed)
+        print(f'Command raised an exception: {type(exception).__name__} : {exception}')
+    except CommandNotFound:
+        pass
 
 @bot.event
 async def on_guild_join(guild):
@@ -106,9 +109,10 @@ async def on_guild_join(guild):
 
     #서버에 들어갔을 때 전송할 메세지
     firstchannel = discord.utils.get(guild.text_channels, position=0)
-    embed = discord.Embed(title='당신의 서버에 저를 추가해주셔서 감사합니다!', description=' ')
-    embed.add_field(name='Tae봇의 접두사는 `&`입니다!', value='관리자 권한이 있을 시 changeprefix 명령어를 통해 접두사를 바꿀 수 있습니다.')
-    embed.add_field(name='\n봇의 사용법을 보시려면 `&help` 명령어를 사용해보세요!')
+    embed = discord.Embed(title='초대 완료', description='', color=0x00ff95)
+    embed.set_author(name=bot.user.name, icon_url=bot.user.avatar_url)
+    embed.add_field(name='Tae를 사용 해주셔서 감사합니다!', value='Tae의 접두사는 `&`입니다!\n자세한 봇의 사용법을 보시려면 `&help` 명령어를 사용해보세요!', inline=False)
+    embed.set_footer(text='(C) 2021 Tae, with 🍰 All rights reserved.')
     await firstchannel.send(embed = embed)
 
 @bot.event
@@ -215,12 +219,14 @@ async def on_message(msg):
 
 @bot.command()
 async def help(ctx, *, args=None):
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    ktime = now_kst
     if args is None:
         embed = discord.Embed(title='TaeBot Help', description=' ', color=0xFAFD40)
         embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='Commands', value='`&help commands`', inline=True)
         embed.add_field(name='Music', value='`&help music`', inline=True)
-        embed.add_field(name='Miscellaneous', value='`&help misc`', inline=True)
         embed.add_field(name='Moderator', value='`&help moderator`', inline=True)
         await ctx.send(embed = embed)
     if args == 'commands':
@@ -228,6 +234,9 @@ async def help(ctx, *, args=None):
         embed = discord.Embed(title='Commands', description=' ', color=0xFAFD40)
         embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`invite`', value='봇 초대링크를 받을 수 있습니다.', inline=True)
+        embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
+        embed.add_field(name='`&userinfo or 내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
+        embed.add_field(name='`&gcreate`', value='&gcreate <시간> <상품> 으로 Giveaway를 만듭니다. (ex. 5s, 5m, 5h, 5d)', inline=True)
         await ctx.send(embed = embed)
     if args == 'music':
         # help music를 사용했을때 출력 될 임베드
@@ -240,14 +249,6 @@ async def help(ctx, *, args=None):
         embed.add_field(name='`&pause`', value='재생 중인 노래를 일시정지 시킵니다', inline=True)
         embed.add_field(name='`&resume`', value='일시정지시켰던 노래를 다시 재생할 수 있습니다', inline=True)
         embed.add_field(name='`&np`', value='재생중인 음악의 정보를 알려줍니다', inline=True)
-        await ctx.send(embed = embed)
-    if args == 'misc':
-        # help misc를 사용했을때 출력 될 임베드
-        embed = discord.Embed(title='Misc', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
-        embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
-        embed.add_field(name='`&userinfo or 내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
-        embed.add_field(name='`&gcreate`', value='&gcreate <시간> <상품> 으로 Giveaway를 만듭니다. (ex. 5s, 5m, 5h, 5d)', inline=True)
         await ctx.send(embed = embed)
     if args == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
@@ -307,6 +308,9 @@ async def 슬로우(ctx, time):
 @commands.has_permissions(administrator=True)
 # 공지사항 embed 전송 명령어
 async def 공지(ctx, *, arg):
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    ktime = now_kst
     # 공지사항 embed를 전송할 채널 가져오기
 
 
@@ -347,6 +351,9 @@ async def 전체공지(ctx, args=None):
 @bot.command()
 @commands.has_permissions(kick_members=True)
 async def 킥(ctx, member: discord.Member=None, *, reasons=None):
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    ktime = now_kst
     try:
         user = await bot.get_user(member.id).create_dm()
         embed = discord.Embed(title='KICKED', description=f'Server: {ctx.guild.name}')
@@ -395,6 +402,9 @@ async def 청소(ctx,amount:int):
 
 @bot.command()
 async def 옌(ctx, *, arg):
+    now_utc = datetime.datetime.now(timezone('UTC'))
+    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
+    ktime = now_kst
     user = await bot.get_user(382891982382563328).create_dm()
     if arg is None:
             error_msg = await ctx.send('보낼 메세지를 제대로 입력해주세요')
@@ -446,7 +456,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
     members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
     if user is None:
         user = ctx.author
-        date_format = '%Y/%m/%d %I:%M:%S'
+        date_format = '%Y/%m/%d %H:%M:%S'
         status = user.status
         if status == discord.Status.online:
             status = 'Online | 온라인'
@@ -467,16 +477,19 @@ async def userinfo(ctx, *, user: discord.Member = None):
         embed.add_field(name='Bot', value=user.bot, inline=False)
         
         activ = user.activities
+        print(activ)
         if activ == ():
             pass
-        elif len(user.activities) == 2:
-            if activ[1].details is None:
-                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중')
-            else:                
-                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`', inline=False)
         elif len(user.activities) == 1:
             if str(user.activities[0].type) == "ActivityType.playing":
-                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)
+                if user.activities[0].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\n ㄴ{activ[0].details}\n ㄴ{activ[0].state}\n__**`{activ[0].large_image_text}`**__ | `{activ[0].small_image_text}`')    
+            elif str(user.activities[0].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[0].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
             elif str(user.activities[0].type) == "ActivityType.custom":
                 embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
 
@@ -513,7 +526,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
         
         activ = user.activities
         if activ == ():
-            return
+            pass
         elif len(user.activities) == 2:
             if activ[1].details is None:
                 embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중')
@@ -533,7 +546,7 @@ async def userinfo(ctx, *, user: discord.Member = None):
 
 @bot.command()
 async def invite(ctx):
-    embed = discord.Embed(title='TaeBot Invite Link', description='[Invite Link](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=45444182&scope=bot)', color=0xFAFD40)
+    embed = discord.Embed(title='Tae Invite Link', description='[Invite Link](https://discord.com/api/oauth2/authorize?client_id=837332366371979336&permissions=33909846&scope=bot)', color=0xFAFD40)
     await ctx.send(embed = embed)
 
 @청소.error
@@ -944,9 +957,6 @@ class Music(commands.Cog):
 
     async def cog_before_invoke(self, ctx: commands.Context):
         ctx.voice_state = self.get_voice_state(ctx)
-
-    async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        await ctx.send('An error occurred: {}'.format(str(error)))
 
     @commands.command(name='join', aliases=['j'], invoke_without_subcommand=True)
     async def _join(self, ctx: commands.Context):
