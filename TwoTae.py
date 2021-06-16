@@ -480,6 +480,112 @@ async def userinfo(ctx, *, user: discord.Member = None):
         print(activ)
         if activ == ():
             pass
+        elif len(user.activities) == 4:
+            # Activity가 네개일때
+            if str(user.activities[0].type) == "ActivityType.playing":
+                if user.activities[0].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\n ㄴ{activ[0].details}\n ㄴ{activ[0].state}\n__**`{activ[0].large_image_text}`**__ | `{activ[0].small_image_text}`')    
+            elif str(user.activities[0].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[0].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[0].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.playing":
+                if user.activities[1].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`')    
+            elif str(user.activities[1].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[1].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[2].type) == "ActivityType.playing":
+                if user.activities[2].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중\n ㄴ{activ[2].details}\n ㄴ{activ[2].state}\n__**`{activ[2].large_image_text}`**__ | `{activ[2].small_image_text}`')    
+            elif str(user.activities[2].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[2].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[2].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[3].type) == "ActivityType.playing":
+                if user.activities[3].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[3].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[3].name}** 하는 중\n ㄴ{activ[3].details}\n ㄴ{activ[3].state}\n__**`{activ[3].large_image_text}`**__ | `{activ[3].small_image_text}`')    
+            elif str(user.activities[3].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[3].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[3].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[3].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[3].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+        elif len(user.activities) == 3:
+            # Activity가 세개일때
+            if str(user.activities[0].type) == "ActivityType.playing":
+                if user.activities[0].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\n ㄴ{activ[0].details}\n ㄴ{activ[0].state}\n__**`{activ[0].large_image_text}`**__ | `{activ[0].small_image_text}`')    
+            elif str(user.activities[0].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[0].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[0].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.playing":
+                if user.activities[1].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`')    
+            elif str(user.activities[1].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[1].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[2].type) == "ActivityType.playing":
+                if user.activities[2].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중\n ㄴ{activ[2].details}\n ㄴ{activ[2].state}\n__**`{activ[2].large_image_text}`**__ | `{activ[2].small_image_text}`')    
+            elif str(user.activities[2].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[2].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[2].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[2].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+        elif len(user.activities) == 2:
+            # Activity가 두개일때
+            if str(user.activities[0].type) == "ActivityType.playing":
+                if user.activities[0].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\n ㄴ{activ[0].details}\n ㄴ{activ[0].state}\n__**`{activ[0].large_image_text}`**__ | `{activ[0].small_image_text}`')    
+            elif str(user.activities[0].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[0].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[0].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[0].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.playing":
+                if user.activities[1].details is None:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중', inline=False)       
+                else:
+                    embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\n ㄴ{activ[1].details}\n ㄴ{activ[1].state}\n__**`{activ[1].large_image_text}`**__ | `{activ[1].small_image_text}`')    
+            elif str(user.activities[1].type) == "ActivityType.Spotify":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 듣는 중\nㄴ**{Spotify.title}**\nㄴ Artist: {Spotify.artist}\nㄴ Album: {Spotify.album}', inline=False)
+            elif str(user.activities[1].type) == "ActivityType.Streaming":
+                embed.add_field(name='현재 활동', value=f'**{activ[1].name}** 하는 중\nㄴ Platform: **{discord.Streaming.platform}**\nㄴ {discord.Streaming.name}\nㄴ [Link]({discord.Streaming.url})')
+            elif str(user.activities[1].type) == "ActivityType.custom":
+                embed.add_field(name='현재 활동', value=f'Custom Status\n**{user.activity}**', inline=False)
+            #Activity가 하나일때
         elif len(user.activities) == 1:
             if str(user.activities[0].type) == "ActivityType.playing":
                 if user.activities[0].details is None:
