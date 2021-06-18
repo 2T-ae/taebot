@@ -296,13 +296,13 @@ async def gcreate(ctx, time=None, *, prize=None):
 async def 슬로우(ctx, time):
     time = int(time)
     if time == 0:
-        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}`초로 설정되었습니다.')
+        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}초`로 설정되었습니다.')
         await ctx.channel.edit(slowmode_delay = 0)
     elif time > 21600:
         await ctx.send(f'{ctx.author.mention}, 초는`0(끄기) ~ 21600(6시간)`으로 입력해주세요.')
     else:
         await ctx.channel.edit(slowmode_delay = time)
-        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}`초로 설정되었습니다.')
+        await ctx.send(f'🛠{ctx.message.channel.mention} 채널의 슬로우 모드가 `{time}초`로 설정되었습니다.')
 
 @bot.command()
 @commands.has_permissions(administrator=True)
