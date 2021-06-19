@@ -112,7 +112,7 @@ async def on_guild_join(guild):
     embed = discord.Embed(title='초대 완료', description='', color=0x00ff95)
     embed.set_author(name=bot.user.name, icon_url=bot.user.avatar_url)
     embed.add_field(name='Tae를 사용 해주셔서 감사합니다!', value='Tae의 접두사는 `&`입니다!\n자세한 봇의 사용법을 보시려면 `&help` 명령어를 사용해보세요!', inline=False)
-    embed.set_footer(text='(C) 2021 Tae, with 🍰 All rights reserved.')
+    embed.set_footer(text='(C) 2021 Tae, All rights reserved.')
     await firstchannel.send(embed = embed)
 
 @bot.event
