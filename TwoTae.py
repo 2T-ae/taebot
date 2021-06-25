@@ -9,6 +9,8 @@ import youtube_dl
 import math
 import functools
 import itertools
+import requests
+import aiohttp
 from pytz import timezone
 from discord import member
 from discord import embeds
@@ -71,17 +73,7 @@ async def status_task():
 
 @bot.event
 async def on_command_error(ctx: commands.Context, exception: Exception):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
-    try:
-        embed = discord.Embed(title='<a:nope_gif:851841522726338580> 오류가 발생했습니다.', description=' ', color=0xFF0000)
-        embed.add_field(name='**Error Message**', value=f'```Command raised an exception: {type(exception).__name__} : {exception}```', inline=False)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
-        await ctx.send(embed = embed)
-        print(f'Command raised an exception: {type(exception).__name__} : {exception}')
-    except CommandNotFound:
-        pass
+    print(f'Command raised an exception: {type(exception).__name__} : {exception}')
 
 @bot.event
 async def on_guild_join(guild):
@@ -333,7 +325,7 @@ async def 공지(ctx, *, arg):
         await asyncio.sleep(5)
         await msg.delete()
 
-@bot.command()
+@bot.command(aliases=['봇공지', 'botannounce'])
 @commands.is_owner()
 # 봇 전체공지 명령어
 async def 전체공지(ctx, args=None):
@@ -348,7 +340,7 @@ async def 전체공지(ctx, args=None):
         else:
             await channel.send(embed = embed)
 
-@bot.command()
+@bot.command(aliases=['kick'])
 @commands.has_permissions(kick_members=True)
 async def 킥(ctx, member: discord.Member=None, *, reasons=None):
     now_utc = datetime.datetime.now(timezone('UTC'))
@@ -392,7 +384,7 @@ async def nuke(ctx):
     await channel.delete()
     await new_channel.send(f'Success. [{ctx.message.author.mention}]')
 
-@bot.command()
+@bot.command(aliases=['clear'])
 @commands.has_permissions(manage_messages=True)
 async def 청소(ctx,amount:int):
     await ctx.channel.purge(limit=int(amount+1))
@@ -400,12 +392,13 @@ async def 청소(ctx,amount:int):
     await asyncio.sleep(5)
     await msg.delete()
 
-@bot.command()
-async def 옌(ctx, *, arg):
+@bot.command(aliases=['디엠'])
+async def DM(ctx, userid, *, arg):
     now_utc = datetime.datetime.now(timezone('UTC'))
     now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
     ktime = now_kst
-    user = await bot.get_user(382891982382563328).create_dm()
+    user = await bot.get_user(int(userid)).create_dm()
+    username = bot.get_user(int(userid))
     if arg is None:
             error_msg = await ctx.send('보낼 메세지를 제대로 입력해주세요')
             await asyncio.sleep(5)
@@ -418,27 +411,16 @@ async def 옌(ctx, *, arg):
         await asyncio.sleep(5)
         await msg.delete()
         embed2 = discord.Embed(title='발송한 메세지 기록', description=' ', color=0xFAFD40)
-        embed2.add_field(name=(arg), value=f'{ktime}에 발송한 메세지입니다.')
+        embed2.add_field(name=(arg), value=f'Today at {ktime} • Send to {username}', inline=False)
         await dm.send(embed = embed2)
         # 전송될 메세지 Embed
-        dm_for_user = await user.send(f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 5초 뒤에 표시됩니다.')
-        await asyncio.sleep(1)
-        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 4초 뒤에 표시됩니다.')
-        await asyncio.sleep(1)
-        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 3초 뒤에 표시됩니다.')
-        await asyncio.sleep(1)
-        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 2초 뒤에 표시됩니다.')
-        await asyncio.sleep(1)
-        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 1초 뒤에 표시됩니다.')
-        await asyncio.sleep(1)
-        await dm_for_user.edit(content=f'`{ctx.author}` 님에게서 메세지가 도착했습니다. 5초가 지났습니다 메세지를 표시합니다.')
-        await asyncio.sleep(0.5)
         embed = discord.Embed(title='Message', description=' ', color=0xFAFD40)
         embed.add_field(name=(arg), value='** **', inline=False)
+        embed.set_footer(text=f'Today at {ktime} • Sender: {ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         await user.send(embed = embed)
 
-@bot.command(name='avatar', aliases=['av'])
-async def _avatar(ctx, member : discord.Member=None):
+@bot.command(aliases=['av'])
+async def avatar(ctx, member : discord.Member=None):
     if member is None:
         embed = discord.Embed(title='Avatar', description='')
         embed.set_image(url=ctx.author.avatar_url)
@@ -807,7 +789,7 @@ async def send_error(ctx, error):
         await ctx.send('{}, 개발자만 사용할 수 있는 명령어입니다!'.format(ctx.message.author.mention))
         return
 
-@옌.error
+@DM.error
 async def send_error(ctx,error):
     # 인수가 비었을 경우 출력 될 메세지
     if isinstance(error, MissingRequiredArgument):
@@ -895,7 +877,6 @@ async def send_error(ctx, error):
         await asyncio.sleep(5)
         await msg.delete()
         
-
 # Music Commands
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -1028,7 +1009,7 @@ class Song:
     def create_embed(self):
         embed = (discord.Embed(title='Now playing',
                                description='```css\n{0.source.title}\n```'.format(self),
-                               color=0xFAFD40)
+                               colour=random.choice(Color))
                  .add_field(name='Duration', value=self.source.duration)
                  .add_field(name='Requested by', value=self.requester.mention)
                  .add_field(name='Uploader', value='[{0.source.uploader}]({0.source.uploader_url})'.format(self))
