@@ -9,6 +9,7 @@ import youtube_dl
 import math
 import functools
 import itertools
+import requests
 import aiohttp
 from pytz import timezone
 from discord import member
@@ -338,6 +339,22 @@ async def 전체공지(ctx, args=None):
             await topchannel.send(embed = embed)
         else:
             await channel.send(embed = embed)
+
+@bot.command()
+@commands.is_owner()
+# 봇이 들어가있는 서버 목록
+async def guildlist(ctx):
+    for i in bot.guilds:
+        with open("guilds.json", "r", encoding='utf-8') as f:
+            guilds = json.load(f)
+
+        guilds["Name: " + str(i.name) + " / Owner: " + str(i.owner) + " / Guild Member Counts: " + str(i.member_count)] = " / Guild ID: "+ str(i.id)
+
+        with open("guilds.json", "w", encoding='utf-8') as f:
+            json.dump(guilds,f)
+
+    tae = await bot.get_user(bot.owner_id).create_dm()
+    await tae.send(guilds)
 
 @bot.command(aliases=['kick'])
 @commands.has_permissions(kick_members=True)
