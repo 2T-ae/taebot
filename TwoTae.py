@@ -9,7 +9,6 @@ import youtube_dl
 import math
 import functools
 import itertools
-import requests
 import aiohttp
 from pytz import timezone
 from discord import member
