@@ -5,7 +5,6 @@ import os
 import datetime
 import shutil
 import json
-from discord.team import TeamMember
 import youtube_dl
 import math
 import functools
@@ -39,6 +38,7 @@ from discord_slash import cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option
 from discord_slash import SlashCommand
 from folder.config import *
+from discord.team import TeamMember
 
 def get_prefix(bot, message):
 
@@ -116,11 +116,9 @@ async def on_guild_join(guild):
 
     #서버에 들어갔을 때 전송할 메세지
     tae = await bot.get_user(298333126143377419).create_dm()
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
     joinem = discord.Embed(title='Joined Server', description='', color=0x00ff95)
-    joinem.set_footer(text=f'Today at {ktime}')
+    joinem.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+    joinem.set_footer(text=f'\u200b')
     joinem.add_field(name=f'Name: {guild.name}', value=f'Owner: {guild.owner}', inline=False)
     await tae.send(embed = joinem)
     print(f'Joined to {guild.name}')
@@ -233,12 +231,10 @@ async def on_message(msg):
 
 @bot.command()
 async def help(ctx, *, args=None):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
     if args is None:
         embed = discord.Embed(title='TaeBot Help', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='Commands', value='`&help commands`', inline=True)
         embed.add_field(name='Music', value='`&help music`', inline=True)
         embed.add_field(name='Moderator', value='`&help moderator`', inline=True)
@@ -247,7 +243,8 @@ async def help(ctx, *, args=None):
     if args == 'commands':
         # help commands를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Commands', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`invite`', value='봇 초대링크를 받을 수 있습니다.', inline=True)
         embed.add_field(name='`&avatar`', value='프로필 이미지를 얻을 수 있습니다.', inline=True)
         embed.add_field(name='`&userinfo or &내정보`', value='디스코드 계정에 대한 정보를 얻을 수 있습니다. (ex. 계정 생성일, 서버 접속일, 현재 활동, 소유중인 역할 등)', inline=True)
@@ -257,7 +254,8 @@ async def help(ctx, *, args=None):
     if args == 'music':
         # help music를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Music', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&join`', value='음성채널에 접속합니다', inline=True)
         embed.add_field(name='`&p <이름 혹은 url>`', value='노래를 재생합니다', inline=True)
         embed.add_field(name='`&q`', value='플레이리스트를 보여줍니다', inline=True)
@@ -269,7 +267,8 @@ async def help(ctx, *, args=None):
     if args == 'moderator':
         # help moderator를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Moderator', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`&공지`', value='&공지 <할 말> 을 통해 서버에 공지를 보낼 수 있습니다. <공지채널 명령어를 통한 채널 설정 필요> \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&공지채널`', value='&공지채널 #채널 을 통해 공지를 보낼 채널을 설정할 수 있습니다. \n\n필요한 권한 : Administrator', inline=True)
         embed.add_field(name='`&청소`', value='&청소 <청소 할 메세지의 갯수> 를 통해 메세지를 청소할 수 있습니다. \n\n필요한 권한 : Manage Messages', inline=True)
@@ -282,7 +281,8 @@ async def help(ctx, *, args=None):
     if args == 'slash':
         # help slash를 사용했을때 출력 될 임베드
         embed = discord.Embed(title='Slash', description=' ', color=0xFAFD40)
-        embed.set_footer(text=f'{ctx.message.author.name} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name='`/가사`', value='/가사 아티스트 제목 으로 노래 가사를 검색할 수 있습니다.', inline=True)
         await ctx.send(embed=embed)
 
@@ -330,9 +330,6 @@ async def 슬로우(ctx, time):
 @commands.has_permissions(administrator=True)
 # 공지사항 embed 전송 명령어
 async def 공지(ctx, *, arg):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
     # 공지사항 embed를 전송할 채널 가져오기
 
 
@@ -345,12 +342,14 @@ async def 공지(ctx, *, arg):
         await ctx.channel.purge(limit=1)
         embed = discord.Embed(title='공지', description=' ', color=0xFAFD40)
         embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text='Sender: 'f'{ctx.message.author} | Today at {ktime}', icon_url=ctx.author.avatar_url)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text='Sender: 'f'{ctx.message.author}', icon_url=ctx.author.avatar_url)
         await bot.get_channel(int(announce)).send(embed = embed)
         msg = await ctx.send(f'{ctx.message.author.mention}님에게 이번 공지에 대한 로그가 전송되었습니다.')
         embed2 = discord.Embed(title='Result', description=' ', color=0XFAFD40)
+        embed2.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed2.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed2.add_field(name=f'`{arg}`' + ' 라는 메세지를 설정한 공지채널에 보냈습니다.', value='** **', inline=False)
-        embed2.set_footer(text=f'Today at {ktime} • {ctx.guild}')
         await dm_channel.send(embed = embed2)
         await asyncio.sleep(5)
         await msg.delete()
@@ -381,75 +380,39 @@ async def guildlist(ctx):
         guilds["Name: " + str(i.name) + " / Owner: " + str(i.owner) + " / Guild Member Counts: " + str(i.member_count)] = " / Guild ID: "+ str(i.id)
 
         with open("guilds.json", "w", encoding='utf-8') as f:
-            json.dump(guilds,f)
+            json.dump(guilds,f,indent=4)
 
-    tae = await bot.get_user(bot.owner_id).create_dm()
-    await tae.send(guilds)
+    try:
+        embed = discord.Embed(title='Guild List', description='🧾', color=0xFDFA40)
+        embed.add_field(name='-', value=guilds, inline=False)
+        tae = await bot.get_user(bot.owner_id).create_dm()
+        file = discord.File("guilds.json")
+        await tae.send(file=file)
+        await ctx.message.add_reaction('✅')
+    except CommandInvokeError:
+        await ctx.message.add_reaction('❌')
 
 @bot.command()
 @commands.is_owner()
 # 봇이 서버를 나가게 하기
 async def guildleave(ctx, *, guild_id):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
     try:
         guildid = int(guild_id)
         guild = bot.get_guild(guildid)
         await guild.leave()
         tae = await bot.get_user(bot.owner_id).create_dm()
         await ctx.message.add_reaction('✅')
-        embed = discord.Embed(title='Success to leave', description='**Force Leave**', color=0x00ff95)
+        embed = discord.Embed(title='Success', description='**Force Leave**', color=0x00ff95)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
         embed.add_field(name=f'\nName: {guild.name}\nID: {guild.id}\nGuild Owner: {guild.owner}\nMembers: {guild.member_count}', value='** **', inline=False)
-        embed.set_footer(text=f'{ctx.message.author} • Today at {ktime}', icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         await tae.send(embed = embed)
     except CommandInvokeError:
         await ctx.message.add_reaction('❌')
-        await ctx.send('An error occured to execute command.')
-        return
-
-@bot.command(aliases=['kick'])
-@commands.has_permissions(kick_members=True)
-async def 킥(ctx, member: discord.Member=None, *, reasons=None):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
-    try:
-        user = await bot.get_user(member.id).create_dm()
-        embed = discord.Embed(title='KICKED', description=f'Server: {ctx.guild.name}')
-        embed.add_field(name='사유', value=f'{reasons}')
-        embed.set_footer(text=f'처리자: {ctx.message.author} • Today at {ktime}', icon_url=ctx.author.avatar_url)
-        await user.send(embed = embed)
-        await member.kick(reason=reasons)
-        embed2 = discord.Embed(title='Result', description='KICK')
-        embed2.add_field(name=f'{member}가 추방되었습니다.', value=f'사유 : {reasons}')
-        embed2.set_footer(text=f'처리자: {ctx.message.author} • Today at {ktime}', icon_url=ctx.author.avatar_url)
-        await ctx.send(embed = embed2)
-    except CommandError:
-        return
-
-@bot.command(aliases=['ban'])
-@commands.has_permissions(kick_members=True)
-async def 밴(ctx, member: discord.Member=None, *, reasons=None):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
-    try:
-        user = await bot.get_user(member.id).create_dm()
-        embed = discord.Embed(title='BANNED', description=f'Server: {ctx.guild.name}')
-        embed.add_field(name='사유', value=f'{reasons}')
-        embed.set_footer(text=f'처리자: {ctx.message.author} • Today at {ktime}', icon_url=ctx.author.avatar_url)
-        await user.send(embed = embed)
-        await member.kick(reason=reasons)
-        embed2 = discord.Embed(title='Result', description='BAN')
-        embed2.add_field(name=f'{member}가 차단되었습니다.', value=f'사유 : {reasons}')
-        embed2.set_footer(text=f'처리자: {ctx.message.author} • Today at {ktime}', icon_url=ctx.author.avatar_url)
-        await ctx.send(embed = embed2)
-    except CommandError:
         return
 
 @bot.command()
-@commands.has_permissions(administrator=True)
+@commands.has_permissions(manage_channels=True)
 async def nuke(ctx):
     await ctx.send('`Nuclear Launch Detected.` 5초 뒤 채널을 터칩니다')
     await asyncio.sleep(1)
@@ -482,9 +445,6 @@ async def 청소(ctx,amount:int):
 
 @bot.command(aliases=['디엠'])
 async def DM(ctx, userid, *, arg):
-    now_utc = datetime.datetime.now(timezone('UTC'))
-    now_kst = now_utc.astimezone(timezone('Asia/Seoul')).strftime("%#I:%M %p")
-    ktime = now_kst
     user = await bot.get_user(int(userid)).create_dm()
     username = bot.get_user(int(userid))
     if arg is None:
@@ -499,12 +459,13 @@ async def DM(ctx, userid, *, arg):
         await asyncio.sleep(5)
         await msg.delete()
         embed2 = discord.Embed(title='발송한 메세지 기록', description=' ', color=0xFAFD40)
-        embed2.add_field(name=(arg), value=f'Today at {ktime} • Send to {username}', inline=False)
+        embed2.add_field(name=(arg), value=f'Send to {username}', inline=False)
         await dm.send(embed = embed2)
         # 전송될 메세지 Embed
         embed = discord.Embed(title='Message', description=' ', color=0xFAFD40)
+        embed.timestamp = datetime.datetime.now(timezone('Asia/Seoul'))
+        embed.set_footer(text=f'Sender: {ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         embed.add_field(name=(arg), value='** **', inline=False)
-        embed.set_footer(text=f'Today at {ktime} • Sender: {ctx.message.author.name}', icon_url=ctx.message.author.avatar_url)
         await user.send(embed = embed)
 
 @bot.command(aliases=['av'])
@@ -918,24 +879,6 @@ async def send_error(ctx, error):
     # 채널이 발견되지 않았을 경우 출력 될 메세지
     if isinstance(error, ChannelNotFound):
         msg3 = await ctx.send(f'{ctx.message.author.mention}, 퇴장로그를 전송할 채널을 제대로 선택해주세요! (ex. 퇴장 #<채널이름>)')
-        await asyncio.sleep(5)
-        await msg3.delete()
-
-@킥.error
-async def send_error(ctx, error):
-    # kick_members 권한이 없을 경우 출력 될 메세지
-    if isinstance(error, MissingPermissions):
-        msg = await ctx.send(f'{ctx.message.author.mention}님은 이 명령어를 사용할 권한이 없습니다!')
-        await asyncio.sleep(5)
-        await msg.delete()
-    # 유저를 멘션하지 않았을 경우 출력 될 메세지
-    if isinstance(error, BadArgument):
-        msg2 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
-        await asyncio.sleep(5)
-        await msg2.delete()
-    # 유저를 멘션하지 않았을 경우 출력 될 메세지
-    if isinstance(error, MissingRequiredArgument):
-        msg3 = await ctx.send(f'{ctx.message.author.mention}, 명령어의 사용이 잘못되었습니다. 추방시킬 유저를 제대로 멘션해주세요! (ex. 킥 @<user>)')
         await asyncio.sleep(5)
         await msg3.delete()
 
